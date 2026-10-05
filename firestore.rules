@@ -39,6 +39,15 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function isValidSnippet(data) {
+      return data.keys().hasOnly(['title', 'language', 'code', 'createdAt', 'updatedAt'])
+        && data.title is string && data.title.size() <= 120
+        && data.language is string && data.language.size() <= 30
+        && data.code is string && data.code.size() <= 50000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
     match /pads/{padId} {
       allow read: if isOwner();
 
@@ -62,6 +71,19 @@ service cloud.firestore {
         allow update: if ownsPad(padId)
           && request.resource.data.createdAt == resource.data.createdAt
           && isValidNote(request.resource.data);
+
+        allow delete: if ownsPad(padId);
+      }
+
+      match /snippets/{snippetId} {
+        allow read: if ownsPad(padId);
+
+        allow create: if ownsPad(padId)
+          && isValidSnippet(request.resource.data);
+
+        allow update: if ownsPad(padId)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && isValidSnippet(request.resource.data);
 
         allow delete: if ownsPad(padId);
       }

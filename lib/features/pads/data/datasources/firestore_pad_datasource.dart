@@ -50,8 +50,7 @@ class FirestorePadDataSource {
 
   /// Subcollections under a Pad. Firestore does not delete these when the
   /// parent is deleted, so add each new one here (tasks, links, ...).
-  static const _subcollections = ['notes'];
-
+  static const _subcollections = ['notes', 'snippets'];
   /// Deletes the Pad's subcollections, then the Pad. Reads from the server
   /// on purpose, so this fails with a clear error when offline instead of
   /// leaving orphaned data.

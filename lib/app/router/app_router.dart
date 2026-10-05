@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/pads/presentation/pad_section.dart';
-import '../../features/pads/presentation/screens/pad_workspace_screen.dart';
-
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -12,7 +9,8 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/home/presentation/screens/more_screen.dart';
-import '../../features/pads/presentation/screens/pad_detail_screen.dart';
+import '../../features/pads/presentation/pad_section.dart';
+import '../../features/pads/presentation/screens/pad_workspace_screen.dart';
 import '../../features/pads/presentation/screens/pads_screen.dart';
 import '../shell/app_shell.dart';
 
@@ -25,10 +23,16 @@ abstract final class AppRoutes {
   static const pads = '/pads';
   static const more = '/more';
 
-  static String padDetail(String padId, {String? section, String? note}) {
-    final query = <String, String>{
-      if (section != null) 'section': section,
-      if (note != null) 'note': note,
+  static String padDetail(
+    String padId, {
+    String? section,
+    String? note,
+    String? snippet,
+  }) {
+       final query = <String, String>{
+      'section': ?section,
+      'note': ?note,
+      'snippet': ?snippet,
     };
     return Uri(
       path: '$pads/$padId',
@@ -42,7 +46,7 @@ abstract final class AppRoutes {
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Re-run redirects whenever auth state changes.
   final refresh = ValueNotifier<int>(0);
-  ref.listen(authStateProvider, (_, __) => refresh.value++);
+  ref.listen(authStateProvider, (_, _) => refresh.value++);
   ref.onDispose(refresh.dispose);
 
   final router = GoRouter(
@@ -100,56 +104,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) {
           // /pads/<id> -> highlight that Pad in the desktop explorer.
           final segments = state.uri.pathSegments;
-          final selectedPadId = segments.length >= 2 && segments.first == 'pads'
-              ? segments[1]
-              : null;
+          final selectedPadId =
+              segments.length >= 2 && segments.first == 'pads'
+                  ? segments[1]
+                  : null;
           return AppShell(
             navigationShell: navigationShell,
             selectedPadId: selectedPadId,
           );
         },
         branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.home,
-                builder: (context, state) => const HomeScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.pads,
-                builder: (context, state) => const PadsScreen(),
-                routes: [
-                  GoRoute(
-                    path: ':padId',
-                    builder: (context, state) {
-                      final id = state.pathParameters['padId']!;
-                      final section = PadSection.fromKey(
-                        state.uri.queryParameters['section'],
-                      );
-                      return PadWorkspaceScreen(
-                        key: ValueKey(id),
-                        padId: id,
-                        section: section,
-                        noteId: state.uri.queryParameters['note'],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.more,
-                builder: (context, state) => const MoreScreen(),
-              ),
-            ],
-          ),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: AppRoutes.pads,
+              builder: (context, state) => const PadsScreen(),
+              routes: [
+                GoRoute(
+                  path: ':padId',
+                  builder: (context, state) {
+                    final id = state.pathParameters['padId']!;
+                    final query = state.uri.queryParameters;
+                    return PadWorkspaceScreen(
+                      key: ValueKey(id),
+                      padId: id,
+                      section: PadSection.fromKey(query['section']),
+                      noteId: query['note'],
+                      snippetId: query['snippet'],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: AppRoutes.more,
+              builder: (context, state) => const MoreScreen(),
+            ),
+          ]),
         ],
       ),
     ],

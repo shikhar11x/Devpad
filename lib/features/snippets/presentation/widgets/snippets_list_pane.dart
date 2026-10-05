@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/empty_state.dart';
-import '../../domain/entities/note.dart';
-import 'note_list_tile.dart';
+import '../../domain/entities/snippet.dart';
+import 'snippet_list_tile.dart';
 
-/// Search box, "new note" button and the list of notes.
-class NotesListPane extends StatelessWidget {
-  const NotesListPane({
+/// Search box, "new snippet" button and the list of snippets.
+class SnippetsListPane extends StatelessWidget {
+  const SnippetsListPane({
     super.key,
-    required this.notes,
+    required this.snippets,
     required this.totalCount,
     required this.selectedId,
     required this.searchController,
@@ -18,15 +18,15 @@ class NotesListPane extends StatelessWidget {
     required this.creating,
   });
 
-  /// Notes after search filtering and sorting.
-  final List<Note> notes;
+  /// Snippets after search filtering and sorting.
+  final List<Snippet> snippets;
 
-  /// Number of notes before filtering (0 means the Pad has no notes at all).
+  /// Number of snippets before filtering (0 = the Pad has none at all).
   final int totalCount;
   final String? selectedId;
   final TextEditingController searchController;
   final ValueChanged<String> onQueryChanged;
-  final ValueChanged<Note> onSelect;
+  final ValueChanged<Snippet> onSelect;
   final VoidCallback onCreate;
   final bool creating;
 
@@ -46,7 +46,7 @@ class NotesListPane extends StatelessWidget {
                     controller: searchController,
                     onChanged: onQueryChanged,
                     decoration: InputDecoration(
-                      hintText: 'Search notes',
+                      hintText: 'Search snippets',
                       prefixIcon: const Icon(Icons.search, size: 18),
                       suffixIcon: value.text.isEmpty
                           ? null
@@ -63,7 +63,7 @@ class NotesListPane extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'New note',
+                tooltip: 'New snippet',
                 onPressed: creating ? null : onCreate,
                 icon: creating
                     ? const SizedBox(
@@ -84,30 +84,30 @@ class NotesListPane extends StatelessWidget {
   Widget _content() {
     if (totalCount == 0) {
       return EmptyState(
-        icon: Icons.sticky_note_2_outlined,
-        title: 'No notes yet.',
-        message: 'Capture ideas, decisions and documentation for this Pad.',
-        actionLabel: 'Create your first note →',
+        icon: Icons.code,
+        title: 'No snippets yet.',
+        message: 'Save reusable code, commands and configs for this Pad.',
+        actionLabel: 'Create your first snippet →',
         onAction: creating ? null : onCreate,
       );
     }
-    if (notes.isEmpty) {
+    if (snippets.isEmpty) {
       return const EmptyState(
         icon: Icons.search_off,
-        title: 'No matching notes',
+        title: 'No matching snippets',
         message: 'Try a different search.',
       );
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
-      itemCount: notes.length,
+      itemCount: snippets.length,
       separatorBuilder: (_, _) => const SizedBox(height: 2),
       itemBuilder: (context, i) {
-        final note = notes[i];
-        return NoteListTile(
-          note: note,
-          selected: note.id == selectedId,
-          onTap: () => onSelect(note),
+        final snippet = snippets[i];
+        return SnippetListTile(
+          snippet: snippet,
+          selected: snippet.id == selectedId,
+          onTap: () => onSelect(snippet),
         );
       },
     );

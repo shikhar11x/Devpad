@@ -12,13 +12,7 @@ enum PadSection {
     9,
     'An infinite canvas for architecture diagrams and brainstorming.',
   ),
-  code(
-    'code',
-    'Code',
-    Icons.code,
-    5,
-    'Code snippets with syntax highlighting and one-tap copy.',
-  ),
+    code('code', 'Code', Icons.code, null, ''),
   tasks(
     'tasks',
     'Tasks',
@@ -49,7 +43,7 @@ enum PadSection {
     this.description,
   );
 
-  /// Value used in the URL: /pads/<id>?section=<key>
+  /// Value used in the URL: `/pads/<id>?section=<key>`
   final String key;
   final String label;
   final IconData icon;

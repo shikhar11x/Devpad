@@ -57,7 +57,7 @@ class PadsBrowser extends ConsumerWidget {
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 16),
                 itemCount: list.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 2),
+                separatorBuilder: (_, _) => const SizedBox(height: 2),
                 itemBuilder: (context, i) {
                   final pad = list[i];
                   return PadListTile(

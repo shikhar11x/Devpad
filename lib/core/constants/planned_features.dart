@@ -28,7 +28,7 @@ const plannedFeatures = <PlannedFeature>[
     icon: Icons.sticky_note_2_outlined,
     stage: 4,
   ),
-  PlannedFeature(
+    PlannedFeature(
     title: 'Code',
     description: 'Snippets with syntax highlighting and one-tap copy.',
     icon: Icons.code,
