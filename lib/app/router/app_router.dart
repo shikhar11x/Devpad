@@ -9,7 +9,8 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/home/presentation/screens/more_screen.dart';
-import '../../features/home/presentation/screens/pads_screen.dart';
+import '../../features/pads/presentation/screens/pad_detail_screen.dart';
+import '../../features/pads/presentation/screens/pads_screen.dart';
 import '../shell/app_shell.dart';
 
 abstract final class AppRoutes {
@@ -20,6 +21,8 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const pads = '/pads';
   static const more = '/more';
+
+  static String padDetail(String padId) => '$pads/$padId';
 
   static const authRoutes = {login, signup, forgotPassword};
 }
@@ -82,8 +85,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            AppShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) {
+          // /pads/<id> -> highlight that Pad in the desktop explorer.
+          final segments = state.uri.pathSegments;
+          final selectedPadId =
+              segments.length >= 2 && segments.first == 'pads'
+                  ? segments[1]
+                  : null;
+          return AppShell(
+            navigationShell: navigationShell,
+            selectedPadId: selectedPadId,
+          );
+        },
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(
@@ -95,6 +108,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: AppRoutes.pads,
               builder: (context, state) => const PadsScreen(),
+              routes: [
+                GoRoute(
+                  path: ':padId',
+                  builder: (context, state) {
+                    final id = state.pathParameters['padId']!;
+                    return PadDetailScreen(key: ValueKey(id), padId: id);
+                  },
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [

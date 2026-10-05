@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/brand_mark.dart';
 import '../../features/auth/presentation/widgets/account_menu.dart';
+import '../../features/pads/presentation/widgets/pad_form_dialog.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'app_destination.dart';
@@ -13,9 +14,14 @@ import 'pad_explorer_panel.dart';
 /// Adaptive scaffold:
 /// desktop = rail + explorer + workspace, tablet = compact rail, mobile = bottom bar.
 class AppShell extends StatelessWidget {
-  const AppShell({super.key, required this.navigationShell});
+  const AppShell({
+    super.key,
+    required this.navigationShell,
+    this.selectedPadId,
+  });
 
   final StatefulNavigationShell navigationShell;
+  final String? selectedPadId;
 
   void _onSelect(int index) {
     navigationShell.goBranch(
@@ -34,14 +40,14 @@ class AppShell extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(
               title: const BrandTitle(),
-              actions: const [
+              actions: [
                 IconButton(
-                  tooltip: 'Coming Soon',
-                  onPressed: null,
-                  icon: Icon(Icons.add),
+                  tooltip: 'New Pad',
+                  onPressed: () => showPadFormDialog(context),
+                  icon: const Icon(Icons.add),
                 ),
-                AccountMenu(),
-                SizedBox(width: 4),
+                const AccountMenu(),
+                const SizedBox(width: 4),
               ],
             ),
             body: navigationShell,
@@ -106,7 +112,10 @@ class AppShell extends StatelessWidget {
               ),
               const VerticalDivider(width: 1),
               if (size.isDesktop) ...[
-                const SizedBox(width: 280, child: PadExplorerPanel()),
+                SizedBox(
+                  width: 300,
+                  child: PadExplorerPanel(selectedPadId: selectedPadId),
+                ),
                 const VerticalDivider(width: 1),
               ],
               Expanded(child: navigationShell),

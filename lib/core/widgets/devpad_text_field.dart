@@ -18,6 +18,8 @@ class DevPadTextField extends StatelessWidget {
     this.onFieldSubmitted,
     this.suffixIcon,
     this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
   });
 
   final TextEditingController controller;
@@ -31,6 +33,8 @@ class DevPadTextField extends StatelessWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final Widget? suffixIcon;
   final bool enabled;
+  final int maxLines;
+  final int? maxLength;
 
   OutlineInputBorder _border(Color color) => OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppTheme.radius),
@@ -54,6 +58,8 @@ class DevPadTextField extends StatelessWidget {
           controller: controller,
           enabled: enabled,
           obscureText: obscureText,
+          maxLines: obscureText ? 1 : maxLines,
+          maxLength: maxLength,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           autofillHints: autofillHints,
@@ -62,6 +68,7 @@ class DevPadTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: suffixIcon,
+            counterText: '',
             errorBorder: _border(AppColors.error),
             focusedErrorBorder: _border(AppColors.error),
           ),

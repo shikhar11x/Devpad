@@ -16,7 +16,7 @@ class PlannedFeature {
 
 /// Roadmap items shown as "Coming Soon". None of these are functional yet.
 const plannedFeatures = <PlannedFeature>[
-  PlannedFeature(
+    PlannedFeature(
     title: 'Pads',
     description: 'Create, search and organize your personal workspaces.',
     icon: Icons.folder_copy_outlined,
