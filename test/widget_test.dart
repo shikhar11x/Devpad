@@ -65,4 +65,31 @@ void main() {
     expect(find.text('No pads yet.'), findsOneWidget);
     expect(find.text('Create your first Pad →'), findsOneWidget);
   });
+    testWidgets('opening a pad shows the workspace sections', (tester) async {
+    await tester.pumpWidget(_app(user: _user, pads: [_pad]));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.folder_copy_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('FieldForce Pro'));
+    await tester.pumpAndSettle();
+
+    for (final label in [
+      'Overview',
+      'Notes',
+      'Canvas',
+      'Code',
+      'Tasks',
+      'Links',
+      'Files',
+    ]) {
+      expect(find.text(label), findsWidgets);
+    }
+    expect(find.text('Field sales app'), findsOneWidget);
+
+    await tester.tap(find.text('Notes'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Coming Soon'), findsWidgets);
+  });
 }

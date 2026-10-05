@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/pads/presentation/pad_section.dart';
+import '../../features/pads/presentation/screens/pad_workspace_screen.dart';
 
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
@@ -22,8 +24,8 @@ abstract final class AppRoutes {
   static const pads = '/pads';
   static const more = '/more';
 
-  static String padDetail(String padId) => '$pads/$padId';
-
+  static String padDetail(String padId, {String? section}) =>
+      section == null ? '$pads/$padId' : '$pads/$padId?section=$section';
   static const authRoutes = {login, signup, forgotPassword};
 }
 
@@ -113,7 +115,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   path: ':padId',
                   builder: (context, state) {
                     final id = state.pathParameters['padId']!;
-                    return PadDetailScreen(key: ValueKey(id), padId: id);
+                    final section = PadSection.fromKey(
+                      state.uri.queryParameters['section'],
+                    );
+                    return PadWorkspaceScreen(
+                      key: ValueKey(id),
+                      padId: id,
+                      section: section,
+                    );
                   },
                 ),
               ],

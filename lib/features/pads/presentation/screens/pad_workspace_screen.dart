@@ -1,0 +1,111 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/app_router.dart';
+import '../../../../core/widgets/coming_soon.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../domain/entities/pad.dart';
+import '../pad_section.dart';
+import '../providers/pad_actions.dart';
+import '../providers/pad_providers.dart';
+import '../widgets/pad_header.dart';
+import '../widgets/pad_overview.dart';
+import '../widgets/pad_section_bar.dart';
+
+/// A single Pad with its section bar. The selected [section] comes from
+/// the URL (?section=notes), so it survives refresh and back navigation.
+class PadWorkspaceScreen extends ConsumerStatefulWidget {
+  const PadWorkspaceScreen({
+    super.key,
+    required this.padId,
+    required this.section,
+  });
+
+  final String padId;
+  final PadSection section;
+
+  @override
+  ConsumerState<PadWorkspaceScreen> createState() =>
+      _PadWorkspaceScreenState();
+}
+
+class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
+  bool _markedOpened = false;
+
+  void _markOpenedOnce(Pad pad) {
+    if (_markedOpened) return;
+    _markedOpened = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(padActionsProvider).markOpened(pad.id);
+    });
+  }
+
+  void _select(PadSection section) {
+    context.go(AppRoutes.padDetail(widget.padId, section: section.key));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final padsAsync = ref.watch(padsProvider);
+    final pad = ref.watch(padByIdProvider(widget.padId));
+
+    if (pad == null) {
+      if (!padsAsync.hasValue) {
+        if (padsAsync.hasError) {
+          return ErrorState(
+            message: padErrorMessage(padsAsync.error!),
+            onRetry: () => ref.invalidate(padsProvider),
+          );
+        }
+        return const LoadingState();
+      }
+      return EmptyState(
+        icon: Icons.search_off,
+        title: 'Pad not found',
+        message: 'It may have been deleted.',
+        actionLabel: 'Back to Pads',
+        onAction: () => context.go(AppRoutes.pads),
+      );
+    }
+
+    _markOpenedOnce(pad);
+
+    return Column(
+      children: [
+        PadHeader(pad: pad),
+        PadSectionBar(selected: widget.section, onSelected: _select),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: KeyedSubtree(
+              key: ValueKey(widget.section),
+              child: _body(pad, widget.section),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Each later stage replaces one placeholder here with the real feature.
+  Widget _body(Pad pad, PadSection section) {
+    switch (section) {
+      case PadSection.overview:
+        return PadOverview(pad: pad);
+      case PadSection.notes:
+      case PadSection.canvas:
+      case PadSection.code:
+      case PadSection.tasks:
+      case PadSection.links:
+      case PadSection.files:
+        return ComingSoonPlaceholder(
+          icon: section.icon,
+          title: section.label,
+          description: '${section.description}\nArrives in Stage ${section.stage}.',
+        );
+    }
+  }
+}
