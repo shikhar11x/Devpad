@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "772374019992",
+    "project_id": "devpad-xi",
+    "storage_bucket": "devpad-xi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:772374019992:android:7e1f32aa2cbc2088e235ed",
+        "android_client_info": {
+          "package_name": "com.devpad.devpad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "772374019992-iadsorqe6bsa664kbdca8mv72f2ee6qa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANegNeJJFx1a5qe7-ATQD-wXAOoHAGYSA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "772374019992-iadsorqe6bsa664kbdca8mv72f2ee6qa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

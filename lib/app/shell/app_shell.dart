@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/brand_mark.dart';
+import '../../features/auth/presentation/widgets/account_menu.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'app_destination.dart';
@@ -39,6 +40,8 @@ class AppShell extends StatelessWidget {
                   onPressed: null,
                   icon: Icon(Icons.add),
                 ),
+                AccountMenu(),
+                SizedBox(width: 4),
               ],
             ),
             body: navigationShell,
@@ -75,12 +78,19 @@ class AppShell extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: Text(
-                        AppConstants.version,
-                        style: AppTheme.mono.copyWith(
-                          fontSize: 10,
-                          color: AppColors.textMuted,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const AccountMenu(),
+                          const SizedBox(height: 8),
+                          Text(
+                            AppConstants.version,
+                            style: AppTheme.mono.copyWith(
+                              fontSize: 10,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

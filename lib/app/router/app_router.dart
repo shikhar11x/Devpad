@@ -2,20 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/providers/auth_providers.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/home/presentation/screens/more_screen.dart';
 import '../../features/home/presentation/screens/pads_screen.dart';
 import '../shell/app_shell.dart';
 
 abstract final class AppRoutes {
+  static const splash = '/';
+  static const login = '/login';
+  static const signup = '/signup';
+  static const forgotPassword = '/forgot-password';
   static const home = '/home';
   static const pads = '/pads';
   static const more = '/more';
+
+  static const authRoutes = {login, signup, forgotPassword};
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Re-run redirects whenever auth state changes.
+  final refresh = ValueNotifier<int>(0);
+  ref.listen(authStateProvider, (_, __) => refresh.value++);
+  ref.onDispose(refresh.dispose);
+
   final router = GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final auth = ref.read(authStateProvider);
+      final location = state.matchedLocation;
+
+      // Auth state not known yet (loading or failed): stay on splash.
+      if (!auth.hasValue) {
+        return location == AppRoutes.splash ? null : AppRoutes.splash;
+      }
+
+      final signedIn = auth.userOrNull != null;
+      final onAuthPage = AppRoutes.authRoutes.contains(location);
+
+      if (!signedIn) return onAuthPage ? null : AppRoutes.login;
+      if (onAuthPage || location == AppRoutes.splash) return AppRoutes.home;
+      return null;
+    },
     errorBuilder: (context, state) => Scaffold(
       body: Center(
         child: Column(
@@ -32,6 +65,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ),
     routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.signup,
+        builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
