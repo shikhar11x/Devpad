@@ -22,7 +22,7 @@ const plannedFeatures = <PlannedFeature>[
     icon: Icons.folder_copy_outlined,
     stage: 2,
   ),
-  PlannedFeature(
+    PlannedFeature(
     title: 'Notes',
     description: 'Markdown notes with autosave, stored per Pad.',
     icon: Icons.sticky_note_2_outlined,

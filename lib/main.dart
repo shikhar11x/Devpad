@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'core/services/firestore_setup.dart';
 import 'app/app.dart';
 import 'app/theme/app_theme.dart';
 import 'core/widgets/error_state.dart';
@@ -9,10 +9,11 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
+    try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    configureFirestore();
   } catch (_) {
     runApp(
       MaterialApp(

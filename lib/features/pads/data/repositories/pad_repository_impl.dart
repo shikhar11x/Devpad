@@ -12,10 +12,14 @@ class PadRepositoryImpl implements PadRepository {
 
   // Firestore writes wait for the server when offline; don't hang the UI.
   static const _writeTimeout = Duration(seconds: 15);
+  static const _deleteTimeout = Duration(seconds: 60);
 
-  Future<void> _guard(Future<void> Function() action) async {
+  Future<void> _guard(
+    Future<void> Function() action, {
+    Duration timeout = _writeTimeout,
+  }) async {
     try {
-      await action().timeout(_writeTimeout);
+      await action().timeout(timeout);
     } catch (e) {
       throw mapPadException(e);
     }
@@ -64,7 +68,7 @@ class PadRepositoryImpl implements PadRepository {
 
   @override
   Future<void> deletePad(String padId) =>
-      _guard(() => _dataSource.delete(padId));
+      _guard(() => _dataSource.delete(padId), timeout: _deleteTimeout);
 
   @override
   Future<void> markOpened(String padId) =>

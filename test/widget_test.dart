@@ -19,12 +19,12 @@ final _pad = Pad(
 );
 
 Widget _app({AuthUser? user, List<Pad> pads = const []}) => ProviderScope(
-      overrides: [
-        authStateProvider.overrideWith((ref) => Stream<AuthUser?>.value(user)),
-        padsProvider.overrideWith((ref) => Stream<List<Pad>>.value(pads)),
-      ],
-      child: const DevPadApp(),
-    );
+  overrides: [
+    authStateProvider.overrideWith((ref) => Stream<AuthUser?>.value(user)),
+    padsProvider.overrideWith((ref) => Stream<List<Pad>>.value(pads)),
+  ],
+  child: const DevPadApp(),
+);
 
 void main() {
   testWidgets('signed out users see the login screen', (tester) async {
@@ -35,8 +35,9 @@ void main() {
     expect(find.text('Sign in'), findsOneWidget);
   });
 
-  testWidgets('signed in users see home with Coming Soon items',
-      (tester) async {
+  testWidgets('signed in users see home with Coming Soon items', (
+    tester,
+  ) async {
     await tester.pumpWidget(_app(user: _user));
     await tester.pumpAndSettle();
 
@@ -65,7 +66,7 @@ void main() {
     expect(find.text('No pads yet.'), findsOneWidget);
     expect(find.text('Create your first Pad →'), findsOneWidget);
   });
-    testWidgets('opening a pad shows the workspace sections', (tester) async {
+  testWidgets('opening a pad shows the workspace sections', (tester) async {
     await tester.pumpWidget(_app(user: _user, pads: [_pad]));
     await tester.pumpAndSettle();
 
@@ -87,7 +88,7 @@ void main() {
     }
     expect(find.text('Field sales app'), findsOneWidget);
 
-    await tester.tap(find.text('Notes'));
+    await tester.tap(find.text('Canvas'));
     await tester.pumpAndSettle();
 
     expect(find.text('Coming Soon'), findsWidgets);

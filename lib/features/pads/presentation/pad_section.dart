@@ -4,13 +4,7 @@ import 'package:flutter/material.dart';
 /// null means it is already implemented.
 enum PadSection {
   overview('overview', 'Overview', Icons.dashboard_outlined, null, ''),
-  notes(
-    'notes',
-    'Notes',
-    Icons.sticky_note_2_outlined,
-    4,
-    'Markdown notes with autosave, stored in this Pad.',
-  ),
+  notes('notes', 'Notes', Icons.sticky_note_2_outlined, null, ''),
   canvas(
     'canvas',
     'Canvas',
@@ -65,8 +59,6 @@ enum PadSection {
   bool get isAvailable => stage == null;
 
   /// Unknown or missing keys fall back to Overview.
-  static PadSection fromKey(String? key) => values.firstWhere(
-        (s) => s.key == key,
-        orElse: () => PadSection.overview,
-      );
+  static PadSection fromKey(String? key) =>
+      values.firstWhere((s) => s.key == key, orElse: () => PadSection.overview);
 }

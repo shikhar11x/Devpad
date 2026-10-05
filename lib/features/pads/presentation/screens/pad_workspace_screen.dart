@@ -7,6 +7,7 @@ import '../../../../core/widgets/coming_soon.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
+import '../../../notes/presentation/widgets/notes_section.dart';
 import '../../domain/entities/pad.dart';
 import '../pad_section.dart';
 import '../providers/pad_actions.dart';
@@ -15,17 +16,19 @@ import '../widgets/pad_header.dart';
 import '../widgets/pad_overview.dart';
 import '../widgets/pad_section_bar.dart';
 
-/// A single Pad with its section bar. The selected [section] comes from
-/// the URL (?section=notes), so it survives refresh and back navigation.
+/// A single Pad with its section bar. The selected [section] (and open
+/// [noteId]) come from the URL, so they survive refresh and back navigation.
 class PadWorkspaceScreen extends ConsumerStatefulWidget {
   const PadWorkspaceScreen({
     super.key,
     required this.padId,
     required this.section,
+    this.noteId,
   });
 
   final String padId;
   final PadSection section;
+  final String? noteId;
 
   @override
   ConsumerState<PadWorkspaceScreen> createState() =>
@@ -96,6 +99,7 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
       case PadSection.overview:
         return PadOverview(pad: pad);
       case PadSection.notes:
+        return NotesSection(padId: pad.id, selectedNoteId: widget.noteId);
       case PadSection.canvas:
       case PadSection.code:
       case PadSection.tasks:
@@ -104,7 +108,8 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
         return ComingSoonPlaceholder(
           icon: section.icon,
           title: section.label,
-          description: '${section.description}\nArrives in Stage ${section.stage}.',
+          description:
+              '${section.description}\nArrives in Stage ${section.stage}.',
         );
     }
   }

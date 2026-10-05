@@ -48,8 +48,30 @@ class FirestorePadDataSource {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-  Future<void> delete(String padId) => _pads.doc(padId).delete();
+  /// Subcollections under a Pad. Firestore does not delete these when the
+  /// parent is deleted, so add each new one here (tasks, links, ...).
+  static const _subcollections = ['notes'];
 
+  /// Deletes the Pad's subcollections, then the Pad. Reads from the server
+  /// on purpose, so this fails with a clear error when offline instead of
+  /// leaving orphaned data.
+  Future<void> delete(String padId) async {
+    final padRef = _pads.doc(padId);
+    for (final name in _subcollections) {
+      final col = padRef.collection(name);
+      while (true) {
+        final snap =
+            await col.limit(400).get(const GetOptions(source: Source.server));
+        if (snap.docs.isEmpty) break;
+        final batch = _db.batch();
+        for (final doc in snap.docs) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+      }
+    }
+    await padRef.delete();
+  }
   Future<void> markOpened(String padId) => _pads.doc(padId).update({
         'lastOpenedAt': FieldValue.serverTimestamp(),
       });
