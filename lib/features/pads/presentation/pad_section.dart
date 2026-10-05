@@ -14,13 +14,7 @@ enum PadSection {
   ),
     code('code', 'Code', Icons.code, null, ''),
     tasks('tasks', 'Tasks', Icons.checklist_rounded, null, ''),
-  links(
-    'links',
-    'Links',
-    Icons.link,
-    7,
-    'Docs, repos and references organized by category.',
-  ),
+  links('links', 'Links', Icons.link, null, ''),
   files(
     'files',
     'Files',

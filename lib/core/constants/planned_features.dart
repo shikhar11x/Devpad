@@ -16,12 +16,7 @@ class PlannedFeature {
 
 /// Roadmap items shown as "Coming Soon". None of these are functional yet.
 const plannedFeatures = <PlannedFeature>[
-  PlannedFeature(
-    title: 'Links',
-    description: 'Docs, repos and references organized by category.',
-    icon: Icons.link,
-    stage: 7,
-  ),
+  
   PlannedFeature(
     title: 'Files',
     description: 'Upload images, PDFs and attachments to a Pad.',

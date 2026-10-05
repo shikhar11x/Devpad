@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
+import '../../../../core/services/url_opener.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_theme.dart';
 
 /// Rendered Markdown in the DevPad dark style.
 class NotePreview extends StatelessWidget {
   const NotePreview({super.key, required this.content});
+  Future<void> _openLink(BuildContext context, String? href) async {
+    if (href == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await openExternalUrl(href);
+    if (!ok) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not open that link.')),
+      );
+    }
+  }
 
   final String content;
 
@@ -51,6 +62,7 @@ class NotePreview extends StatelessWidget {
       selectable: true,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       styleSheet: sheet,
+      onTapLink: (text, href, title) => _openLink(context, href),
     );
   }
 }

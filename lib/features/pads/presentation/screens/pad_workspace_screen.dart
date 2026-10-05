@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../links/presentation/widgets/links_section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../tasks/presentation/widgets/tasks_section.dart';
@@ -110,8 +111,9 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
         );
       case PadSection.tasks:
         return TasksSection(padId: pad.id);
-      case PadSection.canvas:
       case PadSection.links:
+        return LinksSection(padId: pad.id);
+      case PadSection.canvas:
       case PadSection.files:
         return ComingSoonPlaceholder(
           icon: section.icon,

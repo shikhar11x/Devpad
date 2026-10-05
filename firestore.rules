@@ -62,6 +62,19 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function isValidLink(data) {
+      return data.keys().hasOnly([
+          'title', 'url', 'description', 'category', 'createdAt', 'updatedAt'
+        ])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 120
+        && data.url is string && data.url.size() <= 2000
+        && data.url.matches('https?://.*')
+        && data.description is string && data.description.size() <= 500
+        && data.category in ['docs', 'repo', 'design', 'video', 'api', 'tool', 'other']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
     match /pads/{padId} {
       allow read: if isOwner();
 
@@ -111,6 +124,19 @@ service cloud.firestore {
         allow update: if ownsPad(padId)
           && request.resource.data.createdAt == resource.data.createdAt
           && isValidTask(request.resource.data);
+
+        allow delete: if ownsPad(padId);
+      }
+
+      match /links/{linkId} {
+        allow read: if ownsPad(padId);
+
+        allow create: if ownsPad(padId)
+          && isValidLink(request.resource.data);
+
+        allow update: if ownsPad(padId)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && isValidLink(request.resource.data);
 
         allow delete: if ownsPad(padId);
       }
