@@ -56,8 +56,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return AuthScaffold(
       title: 'Welcome back',
       subtitle: 'Sign in to your DevPad workspace.',
-      footer: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      footer: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           const Text(
             'New to DevPad?',
@@ -68,8 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: const Text('Create account'),
           ),
         ],
-      ),
-      child: AutofillGroup(
+      ),      child: AutofillGroup(
         child: Form(
           key: _formKey,
           child: Column(

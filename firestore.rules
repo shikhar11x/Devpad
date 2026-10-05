@@ -48,6 +48,20 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function isValidTask(data) {
+      return data.keys().hasOnly([
+          'title', 'description', 'status', 'priority',
+          'dueDate', 'createdAt', 'updatedAt'
+        ])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 2000
+        && data.status in ['todo', 'in_progress', 'done']
+        && data.priority in ['low', 'medium', 'high']
+        && (data.dueDate == null || data.dueDate is timestamp)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
     match /pads/{padId} {
       allow read: if isOwner();
 
@@ -84,6 +98,19 @@ service cloud.firestore {
         allow update: if ownsPad(padId)
           && request.resource.data.createdAt == resource.data.createdAt
           && isValidSnippet(request.resource.data);
+
+        allow delete: if ownsPad(padId);
+      }
+
+      match /tasks/{taskId} {
+        allow read: if ownsPad(padId);
+
+        allow create: if ownsPad(padId)
+          && isValidTask(request.resource.data);
+
+        allow update: if ownsPad(padId)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && isValidTask(request.resource.data);
 
         allow delete: if ownsPad(padId);
       }

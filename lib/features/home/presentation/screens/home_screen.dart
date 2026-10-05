@@ -98,8 +98,7 @@ class _Hero extends StatelessWidget {
             const Icon(Icons.circle, size: 8, color: AppColors.success),
             const SizedBox(width: 8),
             Text(
-              'Stage 2 · Pad management ready',
-              style: AppTheme.mono.copyWith(
+              'Stage 6 · Tasks ready',              style: AppTheme.mono.copyWith(
                 fontSize: 12,
                 color: AppColors.success,
               ),

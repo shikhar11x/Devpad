@@ -16,30 +16,6 @@ class PlannedFeature {
 
 /// Roadmap items shown as "Coming Soon". None of these are functional yet.
 const plannedFeatures = <PlannedFeature>[
-    PlannedFeature(
-    title: 'Pads',
-    description: 'Create, search and organize your personal workspaces.',
-    icon: Icons.folder_copy_outlined,
-    stage: 2,
-  ),
-    PlannedFeature(
-    title: 'Notes',
-    description: 'Markdown notes with autosave, stored per Pad.',
-    icon: Icons.sticky_note_2_outlined,
-    stage: 4,
-  ),
-    PlannedFeature(
-    title: 'Code',
-    description: 'Snippets with syntax highlighting and one-tap copy.',
-    icon: Icons.code,
-    stage: 5,
-  ),
-  PlannedFeature(
-    title: 'Tasks',
-    description: 'TODO, In Progress and Done with priorities and due dates.',
-    icon: Icons.checklist_rounded,
-    stage: 6,
-  ),
   PlannedFeature(
     title: 'Links',
     description: 'Docs, repos and references organized by category.',

@@ -13,13 +13,7 @@ enum PadSection {
     'An infinite canvas for architecture diagrams and brainstorming.',
   ),
     code('code', 'Code', Icons.code, null, ''),
-  tasks(
-    'tasks',
-    'Tasks',
-    Icons.checklist_rounded,
-    6,
-    'TODO, In Progress and Done with priorities and due dates.',
-  ),
+    tasks('tasks', 'Tasks', Icons.checklist_rounded, null, ''),
   links(
     'links',
     'Links',

@@ -61,8 +61,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return AuthScaffold(
       title: 'Create your account',
       subtitle: 'One login for your phone, browser and desktop.',
-      footer: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      footer: Wrap(
+        alignment: WrapAlignment.center,
+        // crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
             'Already have an account?',

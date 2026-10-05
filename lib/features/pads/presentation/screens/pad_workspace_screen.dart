@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../../tasks/presentation/widgets/tasks_section.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../core/widgets/coming_soon.dart';
 import '../../../../core/widgets/empty_state.dart';
@@ -108,8 +108,9 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
           padId: pad.id,
           selectedSnippetId: widget.snippetId,
         );
-      case PadSection.canvas:
       case PadSection.tasks:
+        return TasksSection(padId: pad.id);
+      case PadSection.canvas:
       case PadSection.links:
       case PadSection.files:
         return ComingSoonPlaceholder(
