@@ -36,31 +36,40 @@ class FirestorePadDataSource {
     required String title,
     required String description,
     required String icon,
-  }) =>
-      _queued(_pads.doc().set(PadModel.createData(
-            ownerId: ownerId,
-            title: title,
-            description: description,
-            icon: icon,
-          )));
+  }) => _queued(
+    _pads.doc().set(
+      PadModel.createData(
+        ownerId: ownerId,
+        title: title,
+        description: description,
+        icon: icon,
+      ),
+    ),
+  );
 
   Future<void> update(
     String padId, {
     required String title,
     required String description,
     required String icon,
-  }) =>
-      _queued(_pads.doc(padId).update(PadModel.updateData(
+  }) => _queued(
+    _pads
+        .doc(padId)
+        .update(
+          PadModel.updateData(
             title: title,
             description: description,
             icon: icon,
-          )));
+          ),
+        ),
+  );
 
-  Future<void> setArchived(String padId, bool archived) =>
-      _queued(_pads.doc(padId).update({
-        'archived': archived,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }));
+  Future<void> setArchived(String padId, bool archived) => _queued(
+    _pads.doc(padId).update({
+      'archived': archived,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }),
+  );
 
   /// Subcollections under a Pad. Firestore does not delete these when the
   /// parent is deleted, so add each new one here.
@@ -70,6 +79,7 @@ class FirestorePadDataSource {
     'tasks',
     'links',
     'canvas',
+    'files',
   ];
 
   /// Deletes the Pad's subcollections, then the Pad. Reads from the server
@@ -80,8 +90,9 @@ class FirestorePadDataSource {
     for (final name in _subcollections) {
       final col = padRef.collection(name);
       while (true) {
-        final snap =
-            await col.limit(400).get(const GetOptions(source: Source.server));
+        final snap = await col
+            .limit(400)
+            .get(const GetOptions(source: Source.server));
         if (snap.docs.isEmpty) break;
         final batch = _db.batch();
         for (final doc in snap.docs) {
@@ -93,10 +104,9 @@ class FirestorePadDataSource {
     await padRef.delete();
   }
 
-  Future<void> markOpened(String padId) =>
-      _queued(_pads.doc(padId).update({
-        'lastOpenedAt': FieldValue.serverTimestamp(),
-      }));
+  Future<void> markOpened(String padId) => _queued(
+    _pads.doc(padId).update({'lastOpenedAt': FieldValue.serverTimestamp()}),
+  );
 
   Future<void> _queued(Future<void> write) async {
     try {

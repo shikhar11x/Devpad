@@ -4,7 +4,7 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/repositories/pad_repository.dart';
 import 'pad_providers.dart';
-
+import '../../../files/presentation/providers/file_providers.dart';
 /// Write operations for Pads. All methods throw `AppFailure` on error.
 class PadActions {
   PadActions(this._ref);
@@ -44,8 +44,14 @@ class PadActions {
   Future<void> setArchived(String padId, bool archived) =>
       _repo.setArchived(padId, archived);
 
-  Future<void> delete(String padId) => _repo.deletePad(padId);
-
+  /// Deletes the Pad, then removes its uploaded files from storage
+  /// (best effort).
+  Future<void> delete(String padId) async {
+    final files = _ref.read(fileRepositoryProvider);
+    final paths = await files.pathsForPad(padId);
+    await _repo.deletePad(padId);
+    await files.removeObjects(paths);
+  }
   /// Best effort: failures are ignored so opening a Pad never errors.
   Future<void> markOpened(String padId) async {
     try {

@@ -82,6 +82,20 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function isValidFile(data, padId) {
+      return data.keys().hasOnly([
+          'name', 'size', 'contentType', 'path', 'createdAt', 'expiresAt'
+        ])
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.size is int && data.size >= 0 && data.size <= 5242880
+        && data.contentType is string && data.contentType.size() <= 100
+        && data.path is string && data.path.size() <= 200
+        && data.path.matches(padId + '/.*')
+        && data.createdAt is timestamp
+        && data.expiresAt is timestamp
+        && data.expiresAt <= request.time + duration.value(8, 'd');
+    }
+
     match /pads/{padId} {
       allow read: if isOwner();
 
@@ -157,6 +171,16 @@ service cloud.firestore {
           && isValidCanvas(request.resource.data);
 
         allow delete: if ownsPad(padId);
+      }
+
+      match /files/{fileId} {
+        allow read: if ownsPad(padId);
+
+        allow create: if ownsPad(padId)
+          && isValidFile(request.resource.data, padId);
+
+        allow delete: if ownsPad(padId);
+        // No updates: a file record never changes.
       }
     }
 

@@ -11,6 +11,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../notes/presentation/widgets/notes_section.dart';
 import '../../../snippets/presentation/widgets/snippets_section.dart';
+import '../../../files/presentation/widgets/files_section.dart';
 import '../../domain/entities/pad.dart';
 import '../pad_section.dart';
 import '../providers/pad_actions.dart';
@@ -99,12 +100,15 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
   }
 
   /// Each later stage replaces one placeholder here with the real feature.
+    /// Every section is implemented.
   Widget _body(Pad pad, PadSection section) {
     switch (section) {
       case PadSection.overview:
         return PadOverview(pad: pad);
       case PadSection.notes:
         return NotesSection(padId: pad.id, selectedNoteId: widget.noteId);
+      case PadSection.canvas:
+        return CanvasSection(padId: pad.id);
       case PadSection.code:
         return SnippetsSection(
           padId: pad.id,
@@ -114,15 +118,8 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
         return TasksSection(padId: pad.id);
       case PadSection.links:
         return LinksSection(padId: pad.id);
-      case PadSection.canvas:
-        return CanvasSection(padId: pad.id);
       case PadSection.files:
-        return ComingSoonPlaceholder(
-          icon: section.icon,
-          title: section.label,
-          description:
-              '${section.description}\nArrives in Stage ${section.stage}.',
-        );
+        return FilesSection(padId: pad.id);
     }
   }
 }

@@ -9,13 +9,7 @@ enum PadSection {
     code('code', 'Code', Icons.code, null, ''),
     tasks('tasks', 'Tasks', Icons.checklist_rounded, null, ''),
   links('links', 'Links', Icons.link, null, ''),
-  files(
-    'files',
-    'Files',
-    Icons.attach_file,
-    8,
-    'Upload images, PDFs and attachments to this Pad.',
-  );
+    files('files', 'Files', Icons.attach_file, null, '');
 
   const PadSection(
     this.key,
