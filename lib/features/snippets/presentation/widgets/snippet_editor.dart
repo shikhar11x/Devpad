@@ -8,6 +8,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/edit_fingerprints.dart';
+import '../../../../core/widgets/conflict_banner.dart';
 // Shared with Notes for now; candidate to move into core/widgets later.
 import '../../../notes/presentation/widgets/note_save_indicator.dart';
 import '../../domain/entities/snippet.dart';
@@ -19,8 +21,11 @@ import 'highlighted_code.dart';
 enum _Mode { edit, view }
 
 /// Edits one snippet with autosave. Create it with `key: ValueKey(id)` so
-/// switching snippets starts fresh. Edits made on another device while this
-/// editor is open are not merged in (last write wins).
+/// switching snippets starts fresh.
+///
+/// While open it follows changes made elsewhere: if you have no unsaved
+/// edits the newer version is loaded; if you do, saving pauses and you
+/// choose Keep mine / Use theirs / Keep both.
 class SnippetEditor extends ConsumerStatefulWidget {
   const SnippetEditor({
     super.key,
@@ -48,6 +53,7 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
   late final TextEditingController _code;
   late final SnippetActions _actions;
   final _codeFocus = FocusNode();
+  final _known = EditFingerprints();
 
   late String _language;
   late _Mode _mode;
@@ -57,31 +63,66 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
   NoteSaveStatus _status = NoteSaveStatus.saved;
   String? _error;
 
+  /// A version from elsewhere that conflicts with unsaved local edits.
+  Snippet? _remote;
+
+  bool get _hasConflict => _remote != null;
+
+  static String _fp(String title, String language, String code) =>
+      EditFingerprints.of([title, language, code]);
+
   @override
   void initState() {
     super.initState();
     _actions = ref.read(snippetActionsProvider);
-    _title = TextEditingController(text: widget.snippet.title);
-    _code = TextEditingController(text: widget.snippet.code);
-    _language = widget.snippet.language;
-    final untouched =
-        widget.snippet.title.isEmpty && widget.snippet.code.isEmpty;
-    _mode = untouched ? _Mode.edit : _Mode.view;
+    final s = widget.snippet;
+    _title = TextEditingController(text: s.title);
+    _code = TextEditingController(text: s.code);
+    _language = s.language;
+    _known.remember(_fp(s.title, s.language, s.code));
+    _mode = (s.title.isEmpty && s.code.isEmpty) ? _Mode.edit : _Mode.view;
+  }
+
+  @override
+  void didUpdateWidget(SnippetEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final s = widget.snippet;
+    final fp = _fp(s.title, s.language, s.code);
+    if (_known.contains(fp)) return; // our own save echoing back
+
+    if (_title.text == s.title && _language == s.language && _code.text == s.code) {
+      _known.remember(fp);
+      return;
+    }
+    if (!_dirty && !_saving) {
+      _adopt(s); // nothing to lose: show the newer version
+      return;
+    }
+    _debounce?.cancel();
+    _remote = s; // local edits differ: ask the user
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    // Don't lose the last edits when leaving. Best effort.
-    if (_dirty) {
+    final title = _title.text;
+    final language = _language;
+    final code = _code.text;
+    if (_hasConflict) {
+      // Never overwrite the other version, and never drop local edits.
+      unawaited(
+        _saveCopy(title, language, code).then<void>((_) {}, onError: (_) {}),
+      );
+    } else if (_dirty) {
+      // Don't lose the last edits when leaving. Best effort.
       unawaited(
         _actions
             .save(
               widget.padId,
               widget.snippet.id,
-              title: _title.text,
-              language: _language,
-              code: _code.text,
+              title: title,
+              language: language,
+              code: code,
             )
             .then<void>((_) {}, onError: (_) {}),
       );
@@ -90,6 +131,68 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
     _code.dispose();
     _codeFocus.dispose();
     super.dispose();
+  }
+
+  /// Replaces the editor content with [s]. Call inside setState if needed.
+  void _adopt(Snippet s) {
+    _debounce?.cancel();
+    _title.text = s.title;
+    _code.text = s.code;
+    _language = s.language;
+    _known.remember(_fp(s.title, s.language, s.code));
+    _dirty = false;
+    _remote = null;
+    _error = null;
+    _status = NoteSaveStatus.saved;
+  }
+
+  Future<void> _saveCopy(String title, String language, String code) async {
+    final base = title.trim().isEmpty ? 'Untitled snippet' : title.trim();
+    var copyTitle = '$base (my version)';
+    if (copyTitle.length > 120) copyTitle = copyTitle.substring(0, 120);
+    final id = await _actions.create(widget.padId, language: language);
+    await _actions.save(
+      widget.padId,
+      id,
+      title: copyTitle,
+      language: language,
+      code: code,
+    );
+  }
+
+  void _keepMine() {
+    setState(() => _remote = null);
+    _markDirty();
+  }
+
+  void _useTheirs() {
+    final remote = _remote;
+    if (remote == null) return;
+    setState(() => _adopt(remote));
+  }
+
+  Future<void> _keepBoth() async {
+    final remote = _remote;
+    if (remote == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final title = _title.text;
+    final language = _language;
+    final code = _code.text;
+    setState(() => _adopt(remote));
+    try {
+      await _saveCopy(title, language, code);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Your version was saved as a new snippet'),
+        ),
+      );
+    } on AppFailure catch (f) {
+      messenger.showSnackBar(SnackBar(content: Text(f.message)));
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not save your version.')),
+      );
+    }
   }
 
   void _setStatus(NoteSaveStatus status) {
@@ -106,7 +209,7 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
 
   Future<void> _save() async {
     _debounce?.cancel();
-    if (!_dirty || !mounted) return;
+    if (!_dirty || !mounted || _hasConflict) return;
     if (_saving) {
       _debounce = Timer(const Duration(milliseconds: 300), _save);
       return;
@@ -115,6 +218,7 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
     final title = _title.text;
     final language = _language;
     final code = _code.text;
+    _known.remember(_fp(title, language, code)); // before the echo can arrive
     _dirty = false;
     _saving = true;
     _setStatus(NoteSaveStatus.saving);
@@ -196,9 +300,10 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
     );
     if (confirmed != true || !mounted) return;
 
-    // Nothing left to autosave.
+    // Nothing left to autosave or to resolve.
     _debounce?.cancel();
     _dirty = false;
+    _remote = null;
 
     final messenger = ScaffoldMessenger.of(context);
     final actions = _actions;
@@ -315,6 +420,13 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
               ],
             ),
           ),
+          if (_hasConflict)
+            ConflictBanner(
+              what: 'snippet',
+              onKeepMine: _keepMine,
+              onUseTheirs: _useTheirs,
+              onKeepBoth: _keepBoth,
+            ),
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),

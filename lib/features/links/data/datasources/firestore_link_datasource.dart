@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../../../core/services/pending_writes.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/resource_link.dart';
@@ -21,10 +23,10 @@ class FirestoreLinkDataSource {
 
   Stream<List<ResourceLink>> watchLinks(String padId) =>
       _links(padId).snapshots().map(
-            (snap) => snap.docs
-                .map<ResourceLink>((d) => ResourceLinkModel.fromDoc(padId, d))
-                .toList(),
-          );
+        (snap) => snap.docs
+            .map<ResourceLink>((d) => ResourceLinkModel.fromDoc(padId, d))
+            .toList(),
+      );
 
   Future<void> create(
     String padId, {
@@ -32,13 +34,16 @@ class FirestoreLinkDataSource {
     required String url,
     required String description,
     required LinkCategory category,
-  }) =>
-      _queued(_links(padId).doc().set(ResourceLinkModel.createData(
-            title: title,
-            url: url,
-            description: description,
-            category: category,
-          )));
+  }) => _queued(
+    _links(padId).doc().set(
+      ResourceLinkModel.createData(
+        title: title,
+        url: url,
+        description: description,
+        category: category,
+      ),
+    ),
+  );
 
   Future<void> update(
     String padId,
@@ -47,22 +52,28 @@ class FirestoreLinkDataSource {
     required String url,
     required String description,
     required LinkCategory category,
-  }) =>
-      _queued(_links(padId).doc(linkId).update(ResourceLinkModel.updateData(
+  }) => _queued(
+    _links(padId)
+        .doc(linkId)
+        .update(
+          ResourceLinkModel.updateData(
             title: title,
             url: url,
             description: description,
             category: category,
-          )));
+          ),
+        ),
+  );
 
   Future<void> delete(String padId, String linkId) =>
       _queued(_links(padId).doc(linkId).delete());
 
-  Future<void> _queued(Future<void> write) async {
+    Future<void> _queued(Future<void> write) async {
     try {
       await write.timeout(_pendingAfter);
     } on TimeoutException {
       // Offline: the write is queued locally and will sync later.
+      PendingWrites.track(write);
     }
   }
 }

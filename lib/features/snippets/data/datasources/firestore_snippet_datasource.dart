@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../../../core/services/pending_writes.dart';
 import '../../domain/entities/snippet.dart';
 import '../models/snippet_model.dart';
 
@@ -53,11 +53,12 @@ class FirestoreSnippetDataSource {
     await _confirmed(_snippets(padId).doc(snippetId).delete());
   }
 
-  Future<bool> _confirmed(Future<void> write) async {
+    Future<bool> _confirmed(Future<void> write) async {
     try {
       await write.timeout(_pendingAfter);
       return true;
     } on TimeoutException {
+      PendingWrites.track(write);
       return false;
     }
   }

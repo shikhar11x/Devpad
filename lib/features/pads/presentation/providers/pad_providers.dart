@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,8 +43,9 @@ class PadSearchQuery extends Notifier<String> {
   void set(String value) => state = value;
 }
 
-final padSearchQueryProvider =
-    NotifierProvider<PadSearchQuery, String>(PadSearchQuery.new);
+final padSearchQueryProvider = NotifierProvider<PadSearchQuery, String>(
+  PadSearchQuery.new,
+);
 
 enum PadFilter { active, archived }
 
@@ -53,8 +56,9 @@ class PadFilterNotifier extends Notifier<PadFilter> {
   void set(PadFilter value) => state = value;
 }
 
-final padFilterProvider =
-    NotifierProvider<PadFilterNotifier, PadFilter>(PadFilterNotifier.new);
+final padFilterProvider = NotifierProvider<PadFilterNotifier, PadFilter>(
+  PadFilterNotifier.new,
+);
 
 // ---- Derived data ----
 
@@ -66,10 +70,12 @@ final visiblePadsProvider = Provider<AsyncValue<List<Pad>>>((ref) {
   return ref.watch(padsProvider).whenData((pads) {
     return pads
         .where((p) => filter == PadFilter.archived ? p.archived : !p.archived)
-        .where((p) =>
-            query.isEmpty ||
-            p.title.toLowerCase().contains(query) ||
-            p.description.toLowerCase().contains(query))
+        .where(
+          (p) =>
+              query.isEmpty ||
+              p.title.toLowerCase().contains(query) ||
+              p.description.toLowerCase().contains(query),
+        )
         .toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   });
@@ -78,10 +84,9 @@ final visiblePadsProvider = Provider<AsyncValue<List<Pad>>>((ref) {
 /// Up to 5 active Pads, most recently opened first.
 final recentPadsProvider = Provider<List<Pad>>((ref) {
   final pads = ref.watch(padsProvider).value ?? const <Pad>[];
-  final recent = pads
-      .where((p) => !p.archived && p.lastOpenedAt != null)
-      .toList()
-    ..sort((a, b) => b.lastOpenedAt!.compareTo(a.lastOpenedAt!));
+  final recent =
+      pads.where((p) => !p.archived && p.lastOpenedAt != null).toList()
+        ..sort((a, b) => b.lastOpenedAt!.compareTo(a.lastOpenedAt!));
   return recent.take(5).toList();
 });
 
@@ -92,4 +97,37 @@ final padByIdProvider = Provider.family<Pad?, String>((ref, id) {
     if (pad.id == id) return pad;
   }
   return null;
+});
+
+/// true = connected to the server. false = offline for more than 4 seconds
+/// (short blips and the first load do not count as offline).
+final connectionProvider = StreamProvider<bool>((ref) {
+  final uid = ref.watch(currentUserProvider.select((u) => u?.uid));
+  if (uid == null) return Stream<bool>.value(true);
+
+  final PadRepository repo;
+  try {
+    repo = ref.watch(padRepositoryProvider);
+  } catch (_) {
+    // Backend not available (for example in tests): assume online.
+    return Stream<bool>.value(true);
+  }
+
+  final controller = StreamController<bool>();
+  Timer? timer;
+  final sub = repo.watchIsFromCache(uid).listen((fromCache) {
+    timer?.cancel();
+    if (fromCache) {
+      timer = Timer(const Duration(seconds: 4), () => controller.add(false));
+    } else {
+      controller.add(true);
+    }
+  }, onError: (Object _) {});
+
+  ref.onDispose(() {
+    timer?.cancel();
+    sub.cancel();
+    controller.close();
+  });
+  return controller.stream;
 });

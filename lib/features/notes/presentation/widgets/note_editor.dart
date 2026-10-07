@@ -8,6 +8,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/edit_fingerprints.dart';
+import '../../../../core/widgets/conflict_banner.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/note_repository.dart';
 import '../markdown_formatter.dart';
@@ -19,8 +21,11 @@ import 'note_save_indicator.dart';
 enum _Mode { edit, preview }
 
 /// Edits one note with autosave. Create it with `key: ValueKey(note.id)` so
-/// switching notes starts fresh. Changes made on another device while this
-/// editor is open are not merged in (the last write wins).
+/// switching notes starts fresh.
+///
+/// While open it follows changes made elsewhere: if you have no unsaved
+/// edits the newer version is loaded; if you do, saving pauses and you
+/// choose Keep mine / Use theirs / Keep both.
 class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({
     super.key,
@@ -48,6 +53,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   late final TextEditingController _content;
   late final NoteActions _actions;
   final _contentFocus = FocusNode();
+  final _known = EditFingerprints();
 
   Timer? _debounce;
   bool _dirty = false;
@@ -56,27 +62,57 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   String? _error;
   _Mode _mode = _Mode.edit;
 
+  /// A version from elsewhere that conflicts with unsaved local edits.
+  Note? _remote;
+
+  bool get _hasConflict => _remote != null;
+
+  static String _fp(String title, String content) =>
+      EditFingerprints.of([title, content]);
+
   @override
   void initState() {
     super.initState();
     _actions = ref.read(noteActionsProvider);
     _title = TextEditingController(text: widget.note.title);
     _content = TextEditingController(text: widget.note.content);
+    _known.remember(_fp(widget.note.title, widget.note.content));
+  }
+
+  @override
+  void didUpdateWidget(NoteEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final n = widget.note;
+    final fp = _fp(n.title, n.content);
+    if (_known.contains(fp)) return; // our own save echoing back
+
+    if (_title.text == n.title && _content.text == n.content) {
+      _known.remember(fp);
+      return;
+    }
+    if (!_dirty && !_saving) {
+      _adopt(n); // nothing to lose: show the newer version
+      return;
+    }
+    _debounce?.cancel();
+    _remote = n; // local edits differ: ask the user
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    // Don't lose the last edits when leaving the note. Best effort.
-    if (_dirty) {
+    final title = _title.text;
+    final content = _content.text;
+    if (_hasConflict) {
+      // Never overwrite the other version, and never drop local edits.
+      unawaited(
+        _saveCopy(title, content).then<void>((_) {}, onError: (_) {}),
+      );
+    } else if (_dirty) {
+      // Don't lose the last edits when leaving the note. Best effort.
       unawaited(
         _actions
-            .save(
-              widget.padId,
-              widget.note.id,
-              title: _title.text,
-              content: _content.text,
-            )
+            .save(widget.padId, widget.note.id, title: title, content: content)
             .then<void>((_) {}, onError: (_) {}),
       );
     }
@@ -84,6 +120,63 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     _content.dispose();
     _contentFocus.dispose();
     super.dispose();
+  }
+
+  /// Replaces the editor text with [n]. Call inside setState if needed.
+  void _adopt(Note n) {
+    _debounce?.cancel();
+    _title.text = n.title;
+    _content.text = n.content;
+    _known.remember(_fp(n.title, n.content));
+    _dirty = false;
+    _remote = null;
+    _error = null;
+    _status = NoteSaveStatus.saved;
+  }
+
+  Future<void> _saveCopy(String title, String content) async {
+    final base = title.trim().isEmpty ? 'Untitled note' : title.trim();
+    var copyTitle = '$base (my version)';
+    if (copyTitle.length > 120) copyTitle = copyTitle.substring(0, 120);
+    final id = await _actions.create(widget.padId);
+    await _actions.save(
+      widget.padId,
+      id,
+      title: copyTitle,
+      content: content,
+    );
+  }
+
+  void _keepMine() {
+    setState(() => _remote = null);
+    _markDirty();
+  }
+
+  void _useTheirs() {
+    final remote = _remote;
+    if (remote == null) return;
+    setState(() => _adopt(remote));
+  }
+
+  Future<void> _keepBoth() async {
+    final remote = _remote;
+    if (remote == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final title = _title.text;
+    final content = _content.text;
+    setState(() => _adopt(remote));
+    try {
+      await _saveCopy(title, content);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Your version was saved as a new note')),
+      );
+    } on AppFailure catch (f) {
+      messenger.showSnackBar(SnackBar(content: Text(f.message)));
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not save your version.')),
+      );
+    }
   }
 
   void _setStatus(NoteSaveStatus status) {
@@ -100,7 +193,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   Future<void> _save() async {
     _debounce?.cancel();
-    if (!_dirty || !mounted) return;
+    if (!_dirty || !mounted || _hasConflict) return;
     if (_saving) {
       // A save is in flight; try again shortly.
       _debounce = Timer(const Duration(milliseconds: 300), _save);
@@ -109,6 +202,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
     final title = _title.text;
     final content = _content.text;
+    _known.remember(_fp(title, content)); // before the echo can arrive
     _dirty = false;
     _saving = true;
     _setStatus(NoteSaveStatus.saving);
@@ -178,9 +272,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     );
     if (confirmed != true || !mounted) return;
 
-    // Nothing left to autosave.
+    // Nothing left to autosave or to resolve.
     _debounce?.cancel();
     _dirty = false;
+    _remote = null;
 
     final messenger = ScaffoldMessenger.of(context);
     final actions = _actions;
@@ -276,6 +371,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
               ],
             ),
           ),
+          if (_hasConflict)
+            ConflictBanner(
+              what: 'note',
+              onKeepMine: _keepMine,
+              onUseTheirs: _useTheirs,
+              onKeepBoth: _keepBoth,
+            ),
           if (editing) MarkdownToolbar(onAction: _format),
           const Divider(height: 1),
           Padding(

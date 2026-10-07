@@ -10,6 +10,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'app_destination.dart';
 import 'pad_explorer_panel.dart';
+import 'sync_status_banner.dart';
 
 /// Adaptive scaffold:
 /// desktop = rail + explorer + workspace, tablet = compact rail, mobile = bottom bar.
@@ -29,6 +30,13 @@ class AppShell extends StatelessWidget {
       initialLocation: index == navigationShell.currentIndex,
     );
   }
+
+  Widget get _content => Column(
+        children: [
+          const SyncStatusBanner(),
+          Expanded(child: navigationShell),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,7 @@ class AppShell extends StatelessWidget {
                 const SizedBox(width: 4),
               ],
             ),
-            body: navigationShell,
+            body: _content,
             bottomNavigationBar: NavigationBar(
               selectedIndex: navigationShell.currentIndex,
               onDestinationSelected: _onSelect,
@@ -118,7 +126,7 @@ class AppShell extends StatelessWidget {
                 ),
                 const VerticalDivider(width: 1),
               ],
-              Expanded(child: navigationShell),
+              Expanded(child: _content),
             ],
           ),
         );

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/services/pending_writes.dart';
 import '../../domain/entities/note.dart';
 import '../models/note_model.dart';
 
@@ -18,12 +19,9 @@ class FirestoreNoteDataSource {
   CollectionReference<Map<String, dynamic>> _notes(String padId) =>
       _db.collection('pads').doc(padId).collection('notes');
 
-  Stream<List<Note>> watchNotes(String padId) =>
-      _notes(padId).snapshots().map(
-            (snap) => snap.docs
-                .map<Note>((d) => NoteModel.fromDoc(padId, d))
-                .toList(),
-          );
+  Stream<List<Note>> watchNotes(String padId) => _notes(padId).snapshots().map(
+    (snap) => snap.docs.map<Note>((d) => NoteModel.fromDoc(padId, d)).toList(),
+  );
 
   Future<String> create(String padId) async {
     final ref = _notes(padId).doc();
@@ -38,12 +36,11 @@ class FirestoreNoteDataSource {
     String noteId, {
     required String title,
     required String content,
-  }) =>
-      _confirmed(
-        _notes(padId).doc(noteId).update(
-              NoteModel.updateData(title: title, content: content),
-            ),
-      );
+  }) => _confirmed(
+    _notes(padId)
+        .doc(noteId)
+        .update(NoteModel.updateData(title: title, content: content)),
+  );
 
   Future<void> delete(String padId, String noteId) async {
     await _confirmed(_notes(padId).doc(noteId).delete());
@@ -54,6 +51,7 @@ class FirestoreNoteDataSource {
       await write.timeout(_pendingAfter);
       return true;
     } on TimeoutException {
+      PendingWrites.track(write);
       return false;
     }
   }

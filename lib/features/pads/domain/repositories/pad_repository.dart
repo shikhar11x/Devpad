@@ -6,6 +6,10 @@ abstract interface class PadRepository {
   /// All Pads owned by [ownerId] (active and archived).
   Stream<List<Pad>> watchPads(String ownerId);
 
+  /// Emits true while data only comes from the local cache
+  /// (offline, or still connecting).
+  Stream<bool> watchIsFromCache(String ownerId);
+
   Future<void> createPad({
     required String ownerId,
     required String title,

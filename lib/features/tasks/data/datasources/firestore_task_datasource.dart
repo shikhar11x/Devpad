@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/services/pending_writes.dart';
 import '../../domain/entities/task.dart';
 import '../models/task_model.dart';
 
@@ -19,11 +20,9 @@ class FirestoreTaskDataSource {
   CollectionReference<Map<String, dynamic>> _tasks(String padId) =>
       _db.collection('pads').doc(padId).collection('tasks');
 
-  Stream<List<Task>> watchTasks(String padId) => _tasks(padId)
-      .snapshots()
-      .map((snap) => snap.docs
-          .map<Task>((d) => TaskModel.fromDoc(padId, d))
-          .toList());
+  Stream<List<Task>> watchTasks(String padId) => _tasks(padId).snapshots().map(
+    (snap) => snap.docs.map<Task>((d) => TaskModel.fromDoc(padId, d)).toList(),
+  );
 
   Future<void> create(
     String padId, {
@@ -32,14 +31,17 @@ class FirestoreTaskDataSource {
     required TaskStatus status,
     required TaskPriority priority,
     DateTime? dueDate,
-  }) =>
-      _queued(_tasks(padId).doc().set(TaskModel.createData(
-            title: title,
-            description: description,
-            status: status,
-            priority: priority,
-            dueDate: dueDate,
-          )));
+  }) => _queued(
+    _tasks(padId).doc().set(
+      TaskModel.createData(
+        title: title,
+        description: description,
+        status: status,
+        priority: priority,
+        dueDate: dueDate,
+      ),
+    ),
+  );
 
   Future<void> update(
     String padId,
@@ -49,20 +51,27 @@ class FirestoreTaskDataSource {
     required TaskStatus status,
     required TaskPriority priority,
     DateTime? dueDate,
-  }) =>
-      _queued(_tasks(padId).doc(taskId).update(TaskModel.updateData(
+  }) => _queued(
+    _tasks(padId)
+        .doc(taskId)
+        .update(
+          TaskModel.updateData(
             title: title,
             description: description,
             status: status,
             priority: priority,
             dueDate: dueDate,
-          )));
+          ),
+        ),
+  );
 
   Future<void> setStatus(String padId, String taskId, TaskStatus status) =>
-      _queued(_tasks(padId).doc(taskId).update({
-        'status': status.key,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }));
+      _queued(
+        _tasks(padId).doc(taskId).update({
+          'status': status.key,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }),
+      );
 
   Future<void> delete(String padId, String taskId) =>
       _queued(_tasks(padId).doc(taskId).delete());
@@ -72,6 +81,7 @@ class FirestoreTaskDataSource {
       await write.timeout(_pendingAfter);
     } on TimeoutException {
       // Offline: the write is queued locally and will sync later.
+      PendingWrites.track(write);
     }
   }
 }
