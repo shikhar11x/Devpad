@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_theme.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../domain/entities/note.dart';
 import 'note_list_tile.dart';
 
-/// Search box, "new note" button and the list of notes.
+/// Search box, "new note" button and the list of notes with cyber styling.
 class NotesListPane extends StatelessWidget {
   const NotesListPane({
     super.key,
@@ -44,15 +46,22 @@ class NotesListPane extends StatelessWidget {
                   valueListenable: searchController,
                   builder: (context, value, _) => TextField(
                     controller: searchController,
+                    style: AppTheme.mono.copyWith(fontSize: 12, color: AppColors.text),
                     onChanged: onQueryChanged,
                     decoration: InputDecoration(
-                      hintText: 'Search notes',
-                      prefixIcon: const Icon(Icons.search, size: 18),
+                      hintText: 'FILTER // SEARCH NOTES...',
+                      hintStyle: AppTheme.mono.copyWith(
+                        fontSize: 11,
+                        color: AppColors.textDim,
+                      ),
+                      prefixIcon: const Icon(Icons.search, size: 17, color: AppColors.textMuted),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       suffixIcon: value.text.isEmpty
                           ? null
                           : IconButton(
                               tooltip: 'Clear',
-                              icon: const Icon(Icons.close, size: 16),
+                              icon: const Icon(Icons.close, size: 15),
+                              color: AppColors.textDim,
                               onPressed: () {
                                 searchController.clear();
                                 onQueryChanged('');
@@ -62,14 +71,20 @@ class NotesListPane extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 4),
               IconButton(
-                tooltip: 'New note',
+                tooltip: 'Create New Note',
                 onPressed: creating ? null : onCreate,
+                color: AppColors.accent,
+                hoverColor: AppColors.accent.withValues(alpha: 0.12),
                 icon: creating
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.accent,
+                        ),
                       )
                     : const Icon(Icons.add),
               ),

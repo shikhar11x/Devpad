@@ -5,7 +5,7 @@ import '../../features/pads/presentation/widgets/pads_browser.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-/// Middle column of the desktop layout: the user's Pads.
+/// Middle column of the desktop layout: high-tech Pad Explorer panel.
 class PadExplorerPanel extends StatelessWidget {
   const PadExplorerPanel({super.key, this.selectedPadId});
 
@@ -13,28 +13,52 @@ class PadExplorerPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
+    return Container(
       color: AppColors.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 10, 8, 8),
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.border, width: 0.8),
+              ),
+            ),
             child: Row(
               children: [
+                Container(
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accent,
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'PADS',
+                    'EXPLORER // WORKSPACES',
                     style: AppTheme.mono.copyWith(
-                      fontSize: 11,
-                      letterSpacing: 1.2,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.1,
                       color: AppColors.textMuted,
                     ),
                   ),
                 ),
                 IconButton(
-                  tooltip: 'New Pad',
-                  icon: const Icon(Icons.add, size: 20),
+                  tooltip: 'Create New Pad',
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.add, size: 18),
+                  color: AppColors.accent,
+                  hoverColor: AppColors.accent.withValues(alpha: 0.12),
                   onPressed: () => showPadFormDialog(context),
                 ),
               ],

@@ -497,27 +497,55 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
                 : Container(
                     width: double.infinity,
                     margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.border),
+                      color: AppColors.surfaceCard,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.35),
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accent.withValues(alpha: 0.08),
+                          blurRadius: 16,
+                        ),
+                      ],
                     ),
                     child: HighlightedCode(code: text, language: _language),
                   ),
           ),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
             decoration: const BoxDecoration(
+              color: AppColors.surface,
               border: Border(top: BorderSide(color: AppColors.border)),
             ),
-            child: Text(
-              'Last edited ${DateFormatter.relative(widget.snippet.updatedAt)}'
-              ' · $lines lines · ${text.length} chars',
-              style: AppTheme.mono.copyWith(
-                fontSize: 11,
-                color: AppColors.textMuted,
-              ),
+            child: Row(
+              children: [
+                Container(
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.neonGreen,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'MODIFIED // ${DateFormatter.relative(widget.snippet.updatedAt)}'
+                    ' · $lines LINES · ${text.length} CHARS · UTF-8',
+                    style: AppTheme.mono.copyWith(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDim,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

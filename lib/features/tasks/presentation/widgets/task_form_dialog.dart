@@ -138,13 +138,42 @@ class _TaskFormDialogState extends ConsumerState<TaskFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.surfaceCard,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.radius),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(
+          color: AppColors.accent.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
       ),
-      title: Text(_editing ? 'Edit task' : 'New task'),
+      title: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accent,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent,
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            _editing ? 'EDIT TASK // CONFIG' : 'CREATE TASK // NEW ITEM',
+            style: AppTheme.mono.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
       content: SizedBox(
         width: 440,
         child: SingleChildScrollView(

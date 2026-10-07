@@ -39,17 +39,18 @@ class _FilesSectionState extends ConsumerState<FilesSection> {
 
   Future<void> _upload() async {
     if (_uploading) return;
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: FileRules.extensions,
-      withData: true,
     );
-    if (result == null || result.files.isEmpty || !mounted) return;
+    if (result.isEmpty || !mounted) return;
 
-    final picked = result.files.first;
-    final bytes = picked.bytes;
-    if (bytes == null) {
-      _say('Could not read that file.');
+    final picked = result.first;
+    final Uint8List bytes;
+    try {
+      bytes = await picked.readAsBytes();
+    } catch (_) {
+      if (mounted) _say('Could not read that file.');
       return;
     }
 

@@ -51,8 +51,8 @@ class CanvasPainter extends CustomPainter {
       PointMode.points,
       dots,
       Paint()
-        ..color = AppColors.border.withValues(alpha: 0.7)
-        ..strokeWidth = 1.5
+        ..color = const Color(0xFF38BDF8).withValues(alpha: 0.16)
+        ..strokeWidth = 1.8
         ..strokeCap = StrokeCap.round,
     );
   }

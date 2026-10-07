@@ -22,58 +22,79 @@ class NoteSaveIndicator extends StatelessWidget {
     final (icon, label, color) = switch (status) {
       NoteSaveStatus.saved => (
           Icons.check_circle_outline,
-          'Saved',
-          AppColors.success,
+          'SYNCED',
+          AppColors.neonGreen,
         ),
       NoteSaveStatus.unsaved => (
           Icons.edit_outlined,
-          'Editing...',
+          'BUFFER_DIRTY',
           AppColors.textMuted,
         ),
       NoteSaveStatus.saving => (
           Icons.sync,
-          'Saving...',
-          AppColors.textMuted,
+          'PERSISTING...',
+          AppColors.accent,
         ),
       NoteSaveStatus.queued => (
           Icons.cloud_off_outlined,
-          'Offline · will sync',
+          'OFFLINE // QUEUED',
           AppColors.warning,
         ),
       NoteSaveStatus.error => (
           Icons.error_outline,
-          'Not saved · Retry',
+          'WRITE_ERROR // RETRY',
           AppColors.error,
         ),
     };
 
-    final content = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            style: AppTheme.mono.copyWith(fontSize: 11, color: color),
-          ),
-        ),
-      ],
-    );
-
-    if (status != NoteSaveStatus.error) return content;
-
-    return Tooltip(
-      message: errorMessage ?? 'Could not save this note.',
-      child: InkWell(
-        onTap: onRetry,
-        borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          child: content,
+    final content = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: color.withValues(alpha: 0.35),
+          width: 0.8,
         ),
       ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 13,
+            color: color,
+            shadows: status == NoteSaveStatus.saved || status == NoteSaveStatus.saving
+                ? [Shadow(color: color, blurRadius: 6)]
+                : null,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: AppTheme.mono.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: color,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+
+    final interactive = status == NoteSaveStatus.error && onRetry != null;
+
+    final child = interactive
+        ? InkWell(
+            onTap: onRetry,
+            borderRadius: BorderRadius.circular(4),
+            child: content,
+          )
+        : content;
+
+    return errorMessage == null ? child : Tooltip(message: errorMessage, child: child);
   }
 }

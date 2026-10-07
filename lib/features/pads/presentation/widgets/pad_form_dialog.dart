@@ -96,13 +96,42 @@ class _PadFormDialogState extends ConsumerState<PadFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.surfaceCard,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.radius),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(
+          color: AppColors.accent.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
       ),
-      title: Text(_editing ? 'Edit Pad' : 'New Pad'),
+      title: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.accent,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent,
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            _editing ? 'EDIT PAD // CONFIG' : 'INITIALIZE NEW PAD',
+            style: AppTheme.mono.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -154,9 +183,11 @@ class _PadFormDialogState extends ConsumerState<PadFormDialog> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'ICON',
+                  '// ICON EMBLEM',
                   style: AppTheme.mono.copyWith(
-                    fontSize: 12,
+                    fontSize: 11,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textMuted,
                   ),
                 ),
@@ -184,7 +215,10 @@ class _PadFormDialogState extends ConsumerState<PadFormDialog> {
       actions: [
         TextButton(
           onPressed: _saving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: AppTheme.mono.copyWith(color: AppColors.textMuted),
+          ),
         ),
         DevPadButton(
           label: _editing ? 'Save' : 'Create Pad',
@@ -212,23 +246,35 @@ class _IconChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(8);
+    final radius = BorderRadius.circular(AppTheme.radiusSm);
     return Tooltip(
       message: label,
       child: InkWell(
         onTap: onTap,
         borderRadius: radius,
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
           width: 40,
           height: 40,
           decoration: BoxDecoration(
             borderRadius: radius,
             color: selected
                 ? AppColors.accent.withValues(alpha: 0.16)
-                : AppColors.background,
+                : AppColors.surfaceHigh,
             border: Border.all(
-              color: selected ? AppColors.accent : AppColors.border,
+              color: selected
+                  ? AppColors.accent
+                  : AppColors.border,
+              width: selected ? 1.5 : 1.0,
             ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: AppColors.accent.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : null,
           ),
           child: Icon(
             icon,

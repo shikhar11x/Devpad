@@ -7,7 +7,7 @@ import '../../../../core/utils/responsive.dart';
 import '../../../../core/widgets/devpad_card.dart';
 import '../../domain/entities/pad.dart';
 
-/// Overview section: real Pad details only.
+/// Cyber Overview section: pad telemetry and metadata.
 class PadOverview extends StatelessWidget {
   const PadOverview({super.key, required this.pad});
 
@@ -28,31 +28,36 @@ class PadOverview extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _Label('DESCRIPTION'),
+              const _Label('DESCRIPTION // WORKSPACE BRIEF'),
               const SizedBox(height: 8),
-              Text(
-                pad.description.isEmpty
-                    ? 'No description yet. Use "Rename / edit" to add one.'
-                    : pad.description,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: pad.description.isEmpty
-                      ? AppColors.textMuted
-                      : AppColors.text,
+              DevPadCard(
+                padding: const EdgeInsets.all(18),
+                child: Text(
+                  pad.description.isEmpty
+                      ? '// No description configured. Click "Rename / edit" in top right menu to set mission parameters.'
+                      : pad.description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: pad.description.isEmpty
+                        ? AppColors.textDim
+                        : AppColors.text,
+                    height: 1.5,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
-              const _Label('DETAILS'),
+              const _Label('TELEMETRY & DETAILS'),
               const SizedBox(height: 8),
               DevPadCard(
                 child: Column(
                   children: [
                     _DetailRow(
                       label: 'Status',
-                      value: pad.archived ? 'Archived' : 'Active',
+                      value: pad.archived ? 'ARCHIVED' : 'ACTIVE & RUNNING',
                       valueColor:
-                          pad.archived ? AppColors.warning : AppColors.success,
+                          pad.archived ? AppColors.warning : AppColors.neonGreen,
+                      isTag: true,
                     ),
-                    const SizedBox(height: 12),
+                    const Divider(color: AppColors.border, height: 24),
                     _DetailRow(
                       label: 'Created',
                       value: DateFormatter.short(pad.createdAt),
@@ -92,6 +97,7 @@ class _Label extends StatelessWidget {
       style: AppTheme.mono.copyWith(
         fontSize: 11,
         letterSpacing: 1.2,
+        fontWeight: FontWeight.w600,
         color: AppColors.textMuted,
       ),
     );
@@ -103,32 +109,69 @@ class _DetailRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.valueColor,
+    this.isTag = false,
   });
 
   final String label;
   final String value;
   final Color? valueColor;
+  final bool isTag;
 
   @override
   Widget build(BuildContext context) {
+    final color = valueColor ?? AppColors.text;
+
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 110,
+          width: 120,
           child: Text(
-            label,
+            label.toUpperCase(),
             style: AppTheme.mono.copyWith(
-              fontSize: 12,
-              color: AppColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDim,
+              letterSpacing: 0.6,
             ),
           ),
         ),
         Expanded(
-          child: Text(
-            value,
-            style: TextStyle(color: valueColor ?? AppColors.text),
-          ),
+          child: isTag
+              ? Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: color.withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        value,
+                        style: AppTheme.mono.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  value,
+                  style: AppTheme.mono.copyWith(
+                    color: color,
+                    fontSize: 13,
+                  ),
+                ),
         ),
       ],
     );

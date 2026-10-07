@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_theme.dart';
 
 /// Shown in an editor when the item was changed elsewhere while the user
 /// has unsaved edits. Autosave pauses until the user picks an option.
@@ -23,10 +24,21 @@ class ConflictBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.1),
-        border: const Border(bottom: BorderSide(color: AppColors.border)),
+        color: AppColors.warning.withValues(alpha: 0.12),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.warning.withValues(alpha: 0.4),
+            width: 1.2,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.warning.withValues(alpha: 0.08),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,36 +46,54 @@ class ConflictBanner extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.warning_amber_rounded,
-                  size: 18, color: AppColors.warning),
+              const Icon(
+                Icons.warning_amber_rounded,
+                size: 18,
+                color: AppColors.warning,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'This $what was changed somewhere else while you were '
-                  'editing. Saving is paused until you choose.',
-                  style: const TextStyle(
+                  'SYNC CONFLICT // This $what was modified remotely while you were editing. Choose resolution strategy:',
+                  style: AppTheme.mono.copyWith(
                     color: AppColors.warning,
-                    fontSize: 13,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 6,
             children: [
               OutlinedButton(
                 onPressed: onKeepMine,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.text,
+                  side: const BorderSide(color: AppColors.border),
+                  visualDensity: VisualDensity.compact,
+                ),
                 child: const Text('Keep mine'),
               ),
               OutlinedButton(
                 onPressed: onUseTheirs,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.text,
+                  side: const BorderSide(color: AppColors.border),
+                  visualDensity: VisualDensity.compact,
+                ),
                 child: const Text('Use theirs'),
               ),
               FilledButton(
                 onPressed: onKeepBoth,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: const Color(0xFF060911),
+                  visualDensity: VisualDensity.compact,
+                ),
                 child: const Text('Keep both'),
               ),
             ],

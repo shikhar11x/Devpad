@@ -27,13 +27,33 @@ class RecentPadsSection extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: Text(
-              'RECENT PADS',
-              style: AppTheme.mono.copyWith(
-                fontSize: 11,
-                letterSpacing: 1.2,
-                color: AppColors.textMuted,
-              ),
+            child: Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.accent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accent,
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'RECENT WORKSPACES // PADS',
+                  style: AppTheme.mono.copyWith(
+                    fontSize: 11,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
             ),
           ),
           Wrap(
@@ -42,13 +62,35 @@ class RecentPadsSection extends ConsumerWidget {
             children: [
               for (final pad in pads)
                 SizedBox(
-                  width: 260,
+                  width: 270,
                   child: DevPadCard(
                     padding: const EdgeInsets.all(12),
                     onTap: () => context.go(AppRoutes.padDetail(pad.id)),
                     child: Row(
                       children: [
-                        Icon(padIconFor(pad.icon), color: AppColors.accent),
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceHigh,
+                            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                            border: Border.all(
+                              color: AppColors.accent.withValues(alpha: 0.4),
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accent.withValues(alpha: 0.15),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            padIconFor(pad.icon),
+                            size: 18,
+                            color: AppColors.accent,
+                          ),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -58,14 +100,17 @@ class RecentPadsSection extends ConsumerWidget {
                                 pad.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
-                                'Opened ${DateFormatter.relative(pad.lastOpenedAt!)}',
+                                'OPENED // ${DateFormatter.relative(pad.lastOpenedAt!)}',
                                 style: AppTheme.mono.copyWith(
                                   fontSize: 10,
-                                  color: AppColors.textMuted,
+                                  color: AppColors.textDim,
+                                  letterSpacing: 0.3,
                                 ),
                               ),
                             ],

@@ -33,9 +33,11 @@ class TaskTile extends StatelessWidget {
     final done = task.isDone;
     final overdue = isOverdue(task);
     final due = task.dueDate;
+    final prioColor = priorityColor(task.priority);
 
     return DevPadCard(
-      padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
+      padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
+      glowColor: prioColor,
       onTap: onTap,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +45,14 @@ class TaskTile extends StatelessWidget {
           Checkbox(
             value: done,
             onChanged: (_) => onToggle(),
-            side: const BorderSide(color: AppColors.textMuted),
+            activeColor: AppColors.accent,
+            checkColor: const Color(0xFF060911),
+            side: BorderSide(
+              color: done
+                  ? AppColors.accent
+                  : AppColors.borderBright,
+              width: 1.5,
+            ),
           ),
           Expanded(
             child: Padding(
@@ -56,7 +65,7 @@ class TaskTile extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       decoration: done ? TextDecoration.lineThrough : null,
-                      color: done ? AppColors.textMuted : AppColors.text,
+                      color: done ? AppColors.textDim : AppColors.text,
                     ),
                   ),
                   if (task.description.isNotEmpty) ...[
@@ -65,8 +74,9 @@ class TaskTile extends StatelessWidget {
                       task.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: AppColors.textMuted),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ],
                   const SizedBox(height: 8),
@@ -76,12 +86,12 @@ class TaskTile extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       _Badge(
-                        label: task.priority.label,
-                        color: priorityColor(task.priority),
+                        label: task.priority.label.toUpperCase(),
+                        color: prioColor,
                       ),
                       if (task.status == TaskStatus.inProgress)
                         const _Badge(
-                          label: 'In progress',
+                          label: 'IN PROGRESS',
                           color: AppColors.accentAlt,
                         ),
                       if (due != null)
@@ -90,21 +100,22 @@ class TaskTile extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.event_outlined,
-                              size: 14,
+                              size: 13,
                               color: overdue
                                   ? AppColors.error
-                                  : AppColors.textMuted,
+                                  : AppColors.textDim,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               overdue
-                                  ? 'Overdue · ${DateFormatter.short(due)}'
-                                  : DateFormatter.short(due),
+                                  ? 'OVERDUE // ${DateFormatter.short(due)}'
+                                  : 'DUE // ${DateFormatter.short(due)}',
                               style: AppTheme.mono.copyWith(
-                                fontSize: 11,
+                                fontSize: 10,
+                                fontWeight: overdue ? FontWeight.w700 : FontWeight.w500,
                                 color: overdue
                                     ? AppColors.error
-                                    : AppColors.textMuted,
+                                    : AppColors.textDim,
                               ),
                             ),
                           ],
@@ -118,7 +129,8 @@ class TaskTile extends StatelessWidget {
           IconButton(
             tooltip: 'Delete task',
             icon: const Icon(Icons.delete_outline, size: 18),
-            color: AppColors.textMuted,
+            color: AppColors.textDim,
+            hoverColor: AppColors.error.withValues(alpha: 0.1),
             onPressed: onDelete,
           ),
         ],
@@ -136,15 +148,29 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        border: Border.all(
+          color: color.withValues(alpha: 0.4),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 6,
+          ),
+        ],
       ),
       child: Text(
         label,
-        style: AppTheme.mono.copyWith(fontSize: 10, color: color),
+        style: AppTheme.mono.copyWith(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.4,
+        ),
       ),
     );
   }

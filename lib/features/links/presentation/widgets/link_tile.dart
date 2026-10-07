@@ -38,12 +38,21 @@ class LinkTile extends StatelessWidget {
           Tooltip(
             message: link.category.label,
             child: Container(
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.border),
+                color: AppColors.surfaceHigh,
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                border: Border.all(
+                  color: AppColors.accent.withValues(alpha: 0.4),
+                  width: 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accent.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                  ),
+                ],
               ),
               child: Icon(
                 categoryIcon(link.category),
@@ -61,18 +70,33 @@ class LinkTile extends StatelessWidget {
                   link.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  hostOf(link.url),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTheme.mono.copyWith(
-                    fontSize: 11,
-                    color: AppColors.accent,
-                  ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.arrow_outward,
+                      size: 12,
+                      color: AppColors.accent.withValues(alpha: 0.8),
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        hostOf(link.url),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTheme.mono.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accent,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 if (link.description.isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -80,8 +104,9 @@ class LinkTile extends StatelessWidget {
                     link.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: AppColors.textMuted),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ],
               ],

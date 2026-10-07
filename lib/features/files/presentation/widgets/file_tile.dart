@@ -27,6 +27,7 @@ class FileTile extends StatelessWidget {
   Widget _fallbackIcon() => Icon(
         file.isImage ? Icons.image_outlined : Icons.picture_as_pdf_outlined,
         color: AppColors.accent,
+        size: 20,
       );
 
   @override
@@ -42,9 +43,18 @@ class FileTile extends StatelessWidget {
             height: 44,
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.border),
+              color: AppColors.surfaceHigh,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+              border: Border.all(
+                color: AppColors.accent.withValues(alpha: 0.4),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                ),
+              ],
             ),
             child: file.isImage
                 ? Image.network(
@@ -64,15 +74,17 @@ class FileTile extends StatelessWidget {
                   file.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${formatBytes(file.size)} · ${expiryLabel(file.expiresAt)}',
+                  '${formatBytes(file.size)} // ${expiryLabel(file.expiresAt)}',
                   style: AppTheme.mono.copyWith(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
+                    fontSize: 10,
+                    color: AppColors.textDim,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],
@@ -101,7 +113,7 @@ class FileTile extends StatelessWidget {
                 child: Row(children: [
                   Icon(Icons.copy_outlined, size: 18),
                   SizedBox(width: 8),
-                  Text('Copy link'),
+                  Text('Copy Link'),
                 ]),
               ),
               PopupMenuItem(

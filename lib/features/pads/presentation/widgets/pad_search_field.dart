@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_theme.dart';
 import '../providers/pad_providers.dart';
 
 class PadSearchField extends ConsumerStatefulWidget {
@@ -36,15 +38,19 @@ class _PadSearchFieldState extends ConsumerState<PadSearchField> {
 
     return TextField(
       controller: _controller,
+      style: AppTheme.mono.copyWith(fontSize: 12, color: AppColors.text),
       onChanged: (v) => ref.read(padSearchQueryProvider.notifier).set(v),
       decoration: InputDecoration(
-        hintText: 'Search pads',
-        prefixIcon: const Icon(Icons.search, size: 18),
+        hintText: 'FILTER // SEARCH PADS...',
+        hintStyle: AppTheme.mono.copyWith(fontSize: 11, color: AppColors.textDim),
+        prefixIcon: const Icon(Icons.search, size: 17, color: AppColors.textMuted),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         suffixIcon: query.isEmpty
             ? null
             : IconButton(
                 tooltip: 'Clear',
-                icon: const Icon(Icons.close, size: 16),
+                icon: const Icon(Icons.close, size: 15),
+                color: AppColors.textDim,
                 onPressed: () =>
                     ref.read(padSearchQueryProvider.notifier).set(''),
               ),

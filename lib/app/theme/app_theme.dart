@@ -4,18 +4,28 @@ import 'app_colors.dart';
 
 abstract final class AppTheme {
   static const double radius = 10;
+  static const double radiusSm = 6;
+  static const double radiusLg = 14;
 
-  /// Monospace style for code, labels and shortcut hints.
+  /// Monospace style for code, labels, tech telemetry and shortcut hints.
   static const mono = TextStyle(
     fontFamily: 'JetBrains Mono',
-    fontFamilyFallback: ['Consolas', 'Menlo', 'Roboto Mono', 'monospace'],
+    fontFamilyFallback: [
+      'Consolas',
+      'Menlo',
+      'Fira Code',
+      'Cascadia Code',
+      'Roboto Mono',
+      'monospace',
+    ],
   );
 
   static ThemeData dark() {
     const scheme = ColorScheme.dark(
       primary: AppColors.accent,
-      onPrimary: Colors.white,
+      onPrimary: Color(0xFF04060A),
       secondary: AppColors.accentAlt,
+      onSecondary: Colors.white,
       surface: AppColors.surface,
       onSurface: AppColors.text,
       error: AppColors.error,
@@ -27,11 +37,12 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
+      fontFamilyFallback: const ['Consolas', 'Segoe UI', 'Roboto', 'sans-serif'],
     );
 
     final inputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(radius),
-      borderSide: const BorderSide(color: AppColors.border),
+      borderRadius: BorderRadius.circular(radiusSm),
+      borderSide: const BorderSide(color: AppColors.border, width: 1.2),
     );
 
     return base.copyWith(
@@ -45,6 +56,13 @@ abstract final class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusLg),
+          side: const BorderSide(color: AppColors.borderBright, width: 1.2),
+        ),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
@@ -54,7 +72,7 @@ abstract final class AppTheme {
         shape: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surface,
+        color: AppColors.surfaceCard,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -64,29 +82,47 @@ abstract final class AppTheme {
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.accent.withValues(alpha: 0.16),
-        selectedIconTheme: const IconThemeData(color: AppColors.accent),
+        indicatorColor: AppColors.accent.withValues(alpha: 0.18),
+        selectedIconTheme: const IconThemeData(
+          color: AppColors.accent,
+          shadows: [
+            Shadow(color: AppColors.accent, blurRadius: 10),
+          ],
+        ),
         unselectedIconTheme: const IconThemeData(color: AppColors.textMuted),
-        selectedLabelTextStyle:
-            const TextStyle(color: AppColors.accent, fontSize: 12),
-        unselectedLabelTextStyle:
-            const TextStyle(color: AppColors.textMuted, fontSize: 12),
+        selectedLabelTextStyle: mono.copyWith(
+          color: AppColors.accent,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+        unselectedLabelTextStyle: mono.copyWith(
+          color: AppColors.textMuted,
+          fontSize: 11,
+          letterSpacing: 0.5,
+        ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
-        indicatorColor: AppColors.accent.withValues(alpha: 0.16),
+        indicatorColor: AppColors.accent.withValues(alpha: 0.18),
         height: 64,
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
                 ? AppColors.accent
                 : AppColors.textMuted,
+            shadows: states.contains(WidgetState.selected)
+                ? const [Shadow(color: AppColors.accent, blurRadius: 8)]
+                : null,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
-          (states) => TextStyle(
-            fontSize: 12,
+          (states) => mono.copyWith(
+            fontSize: 11,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w400,
             color: states.contains(WidgetState.selected)
                 ? AppColors.accent
                 : AppColors.textMuted,
@@ -95,23 +131,33 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.background,
+        fillColor: AppColors.surfaceCard,
         isDense: true,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: inputBorder,
         enabledBorder: inputBorder,
-        disabledBorder: inputBorder,
-        focusedBorder: inputBorder.copyWith(
-          borderSide: const BorderSide(color: AppColors.accent),
+        disabledBorder: inputBorder.copyWith(
+          borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
         ),
-        hintStyle: const TextStyle(color: AppColors.textMuted),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusSm),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+        ),
+        hintStyle: mono.copyWith(color: AppColors.textDim, fontSize: 13),
+        labelStyle: mono.copyWith(color: AppColors.textMuted, fontSize: 12),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
           color: AppColors.surfaceHigh,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accent.withValues(alpha: 0.15),
+              blurRadius: 8,
+            ),
+          ],
         ),
         textStyle: mono.copyWith(fontSize: 12, color: AppColors.text),
       ),

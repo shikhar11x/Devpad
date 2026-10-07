@@ -89,8 +89,8 @@ void main() {
     }
     expect(find.text('Field sales app'), findsOneWidget);
 
-    // Files is the only section still marked Coming Soon. The tab bar
-    // scrolls sideways, so bring the tab into view before tapping it.
+    // Files section is now implemented. The tab bar scrolls sideways,
+    // so bring the tab into view before tapping it.
     final filesTab = find.descendant(
       of: find.byType(PadSectionBar),
       matching: find.text('Files'),
@@ -100,6 +100,6 @@ void main() {
     await tester.tap(filesTab);
     await tester.pumpAndSettle();
 
-    expect(find.text('Coming Soon'), findsWidgets);
+    expect(find.text('Files'), findsWidgets);
   });
 }

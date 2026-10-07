@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_theme.dart';
 
-/// Inline error (default) or success message. Collapses when [message] is null.
+/// Inline cyber telemetry error (default) or success message. Collapses when [message] is null.
 class AuthMessageBanner extends StatelessWidget {
   const AuthMessageBanner({
     super.key,
@@ -15,7 +16,7 @@ class AuthMessageBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isError ? AppColors.error : AppColors.success;
+    final color = isError ? AppColors.error : AppColors.neonGreen;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       child: message == null
@@ -27,9 +28,18 @@ class AuthMessageBanner extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: color.withValues(alpha: 0.4)),
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.5),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.15),
+                      blurRadius: 10,
+                    ),
+                  ],
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +55,11 @@ class AuthMessageBanner extends StatelessWidget {
                     Expanded(
                       child: Text(
                         message!,
-                        style: TextStyle(color: color, fontSize: 13),
+                        style: AppTheme.mono.copyWith(
+                          color: color,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],

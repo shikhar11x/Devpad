@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_colors.dart';
 import '../markdown_formatter.dart';
 
-/// Formatting buttons. Scrolls sideways on narrow screens.
+/// Formatting buttons for cyber markdown editor.
 class MarkdownToolbar extends StatelessWidget {
   const MarkdownToolbar({super.key, required this.onAction});
 
@@ -22,19 +23,27 @@ class MarkdownToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          for (final (action, icon, tip) in _items)
-            IconButton(
-              tooltip: tip,
-              visualDensity: VisualDensity.compact,
-              icon: Icon(icon, size: 18),
-              onPressed: () => onAction(action),
-            ),
-        ],
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        child: Row(
+          children: [
+            for (final (action, icon, tip) in _items)
+              IconButton(
+                tooltip: tip,
+                visualDensity: VisualDensity.compact,
+                icon: Icon(icon, size: 17),
+                color: AppColors.textMuted,
+                hoverColor: AppColors.accent.withValues(alpha: 0.12),
+                onPressed: () => onAction(action),
+              ),
+          ],
+        ),
       ),
     );
   }

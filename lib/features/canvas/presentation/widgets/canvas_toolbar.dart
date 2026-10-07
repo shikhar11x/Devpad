@@ -5,7 +5,7 @@ import '../../domain/entities/canvas_element.dart';
 import '../canvas_controller.dart';
 import '../canvas_tools.dart';
 
-/// Tools, colors, stroke widths and undo/redo. Scrolls sideways when narrow.
+/// Tools, colors, stroke widths and undo/redo with cyber hacker styling.
 class CanvasToolbar extends StatelessWidget {
   const CanvasToolbar({
     super.key,
@@ -16,72 +16,84 @@ class CanvasToolbar extends StatelessWidget {
   final CanvasController controller;
   final VoidCallback onEditText;
 
-  static const _divider = SizedBox(height: 24, child: VerticalDivider(width: 17));
+  static const _divider = SizedBox(
+    height: 24,
+    child: VerticalDivider(width: 17, color: AppColors.border),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (context, _) {
-        final c = controller;
-        final selected = c.selected;
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(
-            children: [
-              for (final tool in CanvasTool.values)
-                _ToolButton(
-                  tool: tool,
-                  active: c.tool == tool,
-                  onTap: () => c.setTool(tool),
-                ),
-              _divider,
-              for (final color in canvasPalette)
-                _ColorDot(
-                  value: color,
-                  active: c.color == color,
-                  onTap: () => c.setColor(color),
-                ),
-              _divider,
-              for (final width in canvasStrokeWidths)
-                _WidthButton(
-                  width: width,
-                  active: c.strokeWidth == width,
-                  onTap: () => c.setStrokeWidth(width),
-                ),
-              _divider,
-              IconButton(
-                tooltip: 'Undo (Ctrl+Z)',
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.undo, size: 20),
-                onPressed: c.canUndo ? c.undo : null,
-              ),
-              IconButton(
-                tooltip: 'Redo (Ctrl+Y)',
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.redo, size: 20),
-                onPressed: c.canRedo ? c.redo : null,
-              ),
-              if (selected != null &&
-                  selected.type == CanvasElementType.text)
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          final c = controller;
+          final selected = c.selected;
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(
+              children: [
+                for (final tool in CanvasTool.values)
+                  _ToolButton(
+                    tool: tool,
+                    active: c.tool == tool,
+                    onTap: () => c.setTool(tool),
+                  ),
+                _divider,
+                for (final color in canvasPalette)
+                  _ColorDot(
+                    value: color,
+                    active: c.color == color,
+                    onTap: () => c.setColor(color),
+                  ),
+                _divider,
+                for (final width in canvasStrokeWidths)
+                  _WidthButton(
+                    width: width,
+                    active: c.strokeWidth == width,
+                    onTap: () => c.setStrokeWidth(width),
+                  ),
+                _divider,
                 IconButton(
-                  tooltip: 'Edit text',
+                  tooltip: 'Undo (Ctrl+Z)',
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.text_fields, size: 20),
-                  onPressed: onEditText,
+                  icon: const Icon(Icons.undo, size: 19),
+                  color: c.canUndo ? AppColors.text : AppColors.textDim,
+                  onPressed: c.canUndo ? c.undo : null,
                 ),
-              IconButton(
-                tooltip: 'Delete selected (Del)',
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.delete_outline, size: 20),
-                color: AppColors.error,
-                onPressed: selected == null ? null : c.deleteSelected,
-              ),
-            ],
-          ),
-        );
-      },
+                IconButton(
+                  tooltip: 'Redo (Ctrl+Y)',
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.redo, size: 19),
+                  color: c.canRedo ? AppColors.text : AppColors.textDim,
+                  onPressed: c.canRedo ? c.redo : null,
+                ),
+                if (selected != null &&
+                    selected.type == CanvasElementType.text)
+                  IconButton(
+                    tooltip: 'Edit text',
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.text_fields, size: 19),
+                    color: AppColors.accent,
+                    onPressed: onEditText,
+                  ),
+                IconButton(
+                  tooltip: 'Delete selected (Del)',
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.delete_outline, size: 19),
+                  color: selected == null ? AppColors.textDim : AppColors.error,
+                  onPressed: selected == null ? null : c.deleteSelected,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -99,17 +111,39 @@ class _ToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tool.tooltip,
-      visualDensity: VisualDensity.compact,
-      icon: Icon(tool.icon, size: 20),
-      style: IconButton.styleFrom(
-        foregroundColor: active ? AppColors.accent : AppColors.textMuted,
-        backgroundColor: active
-            ? AppColors.accent.withValues(alpha: 0.16)
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 140),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      decoration: BoxDecoration(
+        color: active
+            ? AppColors.accent.withValues(alpha: 0.15)
             : Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: active
+              ? AppColors.accent.withValues(alpha: 0.6)
+              : Colors.transparent,
+          width: 1.0,
+        ),
+        boxShadow: active
+            ? [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.2),
+                  blurRadius: 6,
+                ),
+              ]
+            : null,
       ),
-      onPressed: onTap,
+      child: IconButton(
+        tooltip: tool.tooltip,
+        visualDensity: VisualDensity.compact,
+        icon: Icon(
+          tool.icon,
+          size: 19,
+          color: active ? AppColors.accent : AppColors.textMuted,
+        ),
+        onPressed: onTap,
+      ),
     );
   }
 }
@@ -127,20 +161,30 @@ class _ColorDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = Color(value);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: InkResponse(
         onTap: onTap,
-        child: Container(
-          width: 22,
-          height: 22,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          width: active ? 24 : 20,
+          height: active ? 24 : 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(value),
+            color: c,
             border: Border.all(
               color: active ? Colors.white : AppColors.border,
-              width: active ? 2 : 1,
+              width: active ? 2.2 : 1,
             ),
+            boxShadow: active
+                ? [
+                    BoxShadow(
+                      color: c.withValues(alpha: 0.6),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : null,
           ),
         ),
       ),
@@ -165,15 +209,23 @@ class _WidthButton extends StatelessWidget {
       message: 'Stroke ${width.round()}px',
       child: InkResponse(
         onTap: onTap,
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
           width: 32,
           height: 32,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: active
-                ? AppColors.accent.withValues(alpha: 0.16)
+                ? AppColors.accent.withValues(alpha: 0.15)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: active
+                  ? AppColors.accent.withValues(alpha: 0.5)
+                  : Colors.transparent,
+              width: 1.0,
+            ),
           ),
           child: Container(
             width: 16,
@@ -181,6 +233,14 @@ class _WidthButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: active ? AppColors.accent : AppColors.textMuted,
               borderRadius: BorderRadius.circular(width),
+              boxShadow: active
+                  ? [
+                      BoxShadow(
+                        color: AppColors.accent.withValues(alpha: 0.4),
+                        blurRadius: 4,
+                      ),
+                    ]
+                  : null,
             ),
           ),
         ),

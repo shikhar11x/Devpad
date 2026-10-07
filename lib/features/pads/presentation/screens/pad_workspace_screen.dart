@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../canvas/presentation/widgets/canvas_section.dart';
 import '../../../tasks/presentation/widgets/tasks_section.dart';
 import '../../../../app/router/app_router.dart';
-import '../../../../core/widgets/coming_soon.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
