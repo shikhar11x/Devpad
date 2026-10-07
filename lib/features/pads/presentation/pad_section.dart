@@ -5,13 +5,7 @@ import 'package:flutter/material.dart';
 enum PadSection {
   overview('overview', 'Overview', Icons.dashboard_outlined, null, ''),
   notes('notes', 'Notes', Icons.sticky_note_2_outlined, null, ''),
-  canvas(
-    'canvas',
-    'Canvas',
-    Icons.draw_outlined,
-    9,
-    'An infinite canvas for architecture diagrams and brainstorming.',
-  ),
+  canvas('canvas', 'Canvas', Icons.draw_outlined, null, ''),
     code('code', 'Code', Icons.code, null, ''),
     tasks('tasks', 'Tasks', Icons.checklist_rounded, null, ''),
   links('links', 'Links', Icons.link, null, ''),

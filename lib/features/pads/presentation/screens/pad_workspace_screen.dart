@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../links/presentation/widgets/links_section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../canvas/presentation/widgets/canvas_section.dart';
 import '../../../tasks/presentation/widgets/tasks_section.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../core/widgets/coming_soon.dart';
@@ -114,6 +115,7 @@ class _PadWorkspaceScreenState extends ConsumerState<PadWorkspaceScreen> {
       case PadSection.links:
         return LinksSection(padId: pad.id);
       case PadSection.canvas:
+        return CanvasSection(padId: pad.id);
       case PadSection.files:
         return ComingSoonPlaceholder(
           icon: section.icon,

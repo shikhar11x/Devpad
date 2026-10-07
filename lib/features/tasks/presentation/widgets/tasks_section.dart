@@ -40,9 +40,6 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
     super.dispose();
   }
 
-  void _say(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
 
   Future<void> _quickAdd() async {
     final title = _quick.text.trim();

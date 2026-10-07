@@ -74,22 +74,21 @@ class _Hero extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           AppConstants.appName,
-          style: theme.textTheme.displaySmall
-              ?.copyWith(fontWeight: FontWeight.w700),
+          style: theme.textTheme.displaySmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           AppConstants.tagline,
-          style: AppTheme.mono.copyWith(
-            fontSize: 16,
-            color: AppColors.accent,
-          ),
+          style: AppTheme.mono.copyWith(fontSize: 16, color: AppColors.accent),
         ),
         const SizedBox(height: 12),
         Text(
           'A developer workspace for ideas, notes, code, diagrams and tasks.',
-          style: theme.textTheme.bodyLarge
-              ?.copyWith(color: AppColors.textMuted),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: AppColors.textMuted,
+          ),
         ),
         const SizedBox(height: 16),
         Row(
@@ -98,7 +97,8 @@ class _Hero extends StatelessWidget {
             const Icon(Icons.circle, size: 8, color: AppColors.success),
             const SizedBox(width: 8),
             Text(
-              'Stage 6 · Tasks ready',              style: AppTheme.mono.copyWith(
+              'Stage 9 · Canvas ready',
+              style: AppTheme.mono.copyWith(
                 fontSize: 12,
                 color: AppColors.success,
               ),

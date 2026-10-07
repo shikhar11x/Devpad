@@ -23,10 +23,4 @@ const plannedFeatures = <PlannedFeature>[
     icon: Icons.attach_file,
     stage: 8,
   ),
-  PlannedFeature(
-    title: 'Canvas',
-    description: 'Infinite Excalidraw-style canvas for architecture diagrams.',
-    icon: Icons.draw_outlined,
-    stage: 9,
-  ),
 ];

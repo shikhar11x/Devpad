@@ -75,6 +75,13 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function isValidCanvas(data) {
+      return data.keys().hasOnly(['elements', 'version', 'updatedAt'])
+        && data.elements is string && data.elements.size() <= 800000
+        && data.version is int
+        && data.updatedAt is timestamp;
+    }
+
     match /pads/{padId} {
       allow read: if isOwner();
 
@@ -137,6 +144,17 @@ service cloud.firestore {
         allow update: if ownsPad(padId)
           && request.resource.data.createdAt == resource.data.createdAt
           && isValidLink(request.resource.data);
+
+        allow delete: if ownsPad(padId);
+      }
+
+      // One document per Pad: pads/{padId}/canvas/main
+      match /canvas/{docId} {
+        allow read: if ownsPad(padId) && docId == 'main';
+
+        allow create, update: if ownsPad(padId)
+          && docId == 'main'
+          && isValidCanvas(request.resource.data);
 
         allow delete: if ownsPad(padId);
       }
