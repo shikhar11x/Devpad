@@ -386,8 +386,7 @@ conventional commit messages (`feat:`, `fix:`, `docs:`, `refactor:`).
 
 ## License
 
-Add a license before publishing (MIT is a common choice for open source) and
-reference it here, for example: `MIT © <shikhar11x>`.
+`MIT © <shikhar11x>`.
 
 ---
 
