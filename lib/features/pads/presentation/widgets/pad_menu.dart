@@ -7,38 +7,19 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../domain/entities/pad.dart';
+import '../../../../core/widgets/cyber_confirm_dialog.dart';
 import '../providers/pad_actions.dart';
 import 'pad_form_dialog.dart';
 
 enum PadMenuAction { edit, archive, delete }
 
 Future<bool?> _confirmDelete(BuildContext context, Pad pad) {
-  return showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      backgroundColor: AppColors.surface,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radius),
-        side: const BorderSide(color: AppColors.border),
-      ),
-      title: const Text('Delete Pad?'),
-      content: Text(
-        '"${pad.title}" will be permanently deleted. This cannot be undone.\n\n'
-        'Tip: archive it instead if you might need it later.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-          onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Delete'),
-        ),
-      ],
-    ),
+  return showCyberConfirmDialog(
+    context,
+    title: 'Delete Pad "${pad.title}"?',
+    message: '"${pad.title}" will be permanently deleted from the workspace. This cannot be undone.\n\nTip: You can archive it instead if you might need it later.',
+    confirmLabel: 'Delete Pad',
+    icon: Icons.delete_forever_rounded,
   );
 }
 
@@ -96,7 +77,15 @@ class PadMenuButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<PadMenuAction>(
       tooltip: 'Pad options',
-      color: AppColors.surfaceHigh,
+      color: AppColors.surfaceElevated,
+      elevation: 12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: AppColors.cyan.withValues(alpha: 0.25),
+          width: 1,
+        ),
+      ),
       icon: const Icon(Icons.more_vert, size: 18),
       onSelected: (action) => runPadMenuAction(
         context,
