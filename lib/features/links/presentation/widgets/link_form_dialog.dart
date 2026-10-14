@@ -116,13 +116,69 @@ class _LinkFormDialogState extends ConsumerState<LinkFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.surfaceSecondary,
       surfaceTintColor: Colors.transparent,
+      elevation: 24,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radius),
-        side: const BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: AppColors.cyan.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
       ),
-      title: Text(_editing ? 'Edit link' : 'Add link'),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+      title: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: AppColors.cyan.withValues(alpha: 0.12),
+              border: Border.all(
+                color: AppColors.cyan.withValues(alpha: 0.4),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.cyan.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.link_rounded, size: 20, color: AppColors.cyan),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _editing ? 'CONFIG // RECORD' : 'NEW RESOURCE // URL',
+                  style: AppTheme.mono.copyWith(
+                    fontSize: 10,
+                    letterSpacing: 1.5,
+                    color: AppColors.cyan,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _editing ? 'Edit Resource' : 'Add Resource Link',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       content: SizedBox(
         width: 440,
         child: SingleChildScrollView(
@@ -133,24 +189,34 @@ class _LinkFormDialogState extends ConsumerState<LinkFormDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (_error != null) ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          size: 18, color: AppColors.error),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _error!,
-                          style: const TextStyle(
-                            color: AppColors.error,
-                            fontSize: 13,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.error.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            size: 18, color: AppColors.error),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _error!,
+                            style: const TextStyle(
+                              color: AppColors.error,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
                 ],
                 DevPadTextField(
                   controller: _url,
@@ -183,10 +249,11 @@ class _LinkFormDialogState extends ConsumerState<LinkFormDialog> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'CATEGORY',
+                  '// CATEGORY CLASSIFICATION',
                   style: AppTheme.mono.copyWith(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    letterSpacing: 0.8,
+                    color: AppColors.textDim,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -196,9 +263,27 @@ class _LinkFormDialogState extends ConsumerState<LinkFormDialog> {
                   children: [
                     for (final c in LinkCategory.values)
                       ChoiceChip(
-                        avatar: Icon(categoryIcon(c), size: 16),
-                        label: Text(c.label),
+                        avatar: Icon(
+                          categoryIcon(c),
+                          size: 15,
+                          color: c == _category ? AppColors.cyan : AppColors.textMuted,
+                        ),
+                        label: Text(
+                          c.label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: c == _category ? FontWeight.w600 : FontWeight.w400,
+                            color: c == _category ? AppColors.cyan : AppColors.textDim,
+                          ),
+                        ),
                         selected: c == _category,
+                        selectedColor: AppColors.cyan.withValues(alpha: 0.15),
+                        backgroundColor: AppColors.surfaceElevated,
+                        side: BorderSide(
+                          color: c == _category
+                              ? AppColors.cyan.withValues(alpha: 0.6)
+                              : AppColors.border,
+                        ),
                         showCheckmark: false,
                         onSelected:
                             _saving ? null : (_) => setState(() => _category = c),
@@ -211,12 +296,21 @@ class _LinkFormDialogState extends ConsumerState<LinkFormDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.textMuted,
+            side: const BorderSide(color: AppColors.border),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
           onPressed: _saving ? null : () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         DevPadButton(
-          label: _editing ? 'Save' : 'Add link',
+          label: _editing ? 'Save Changes' : 'Register Link',
+          icon: const Icon(Icons.check, size: 16),
           isLoading: _saving,
           expand: false,
           onPressed: _submit,

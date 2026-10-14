@@ -8,6 +8,7 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/services/url_opener.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../../core/utils/web_url.dart';
+import '../../../../core/widgets/cyber_confirm_dialog.dart';
 import '../../../../core/widgets/devpad_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
@@ -50,29 +51,12 @@ class _LinksSectionState extends ConsumerState<LinksSection> {
   }
 
   Future<void> _delete(ResourceLink link) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radius),
-          side: const BorderSide(color: AppColors.border),
-        ),
-        title: const Text('Delete link?'),
-        content: Text('"${link.title}" will be permanently deleted.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await showCyberConfirmDialog(
+      context,
+      title: 'Delete "${link.title}"?',
+      message: '"${link.title}" will be permanently removed from bookmarks.',
+      confirmLabel: 'Delete Link',
+      icon: Icons.link_off_rounded,
     );
     if (confirmed != true || !mounted) return;
 
@@ -119,20 +103,36 @@ class _LinksSectionState extends ConsumerState<LinksSection> {
               padding: EdgeInsets.fromLTRB(edge, 16, edge, 8),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      links.isEmpty
-                          ? 'RESOURCES'
-                          : 'RESOURCES · ${links.length}',
-                      style: AppTheme.mono.copyWith(
-                        fontSize: 11,
-                        letterSpacing: 1.2,
-                        color: AppColors.textMuted,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.cyan.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: AppColors.cyan.withValues(alpha: 0.3),
+                        width: 1,
                       ),
                     ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.link_rounded, size: 13, color: AppColors.cyan),
+                        const SizedBox(width: 6),
+                        Text(
+                          links.isEmpty ? 'RESOURCES // EMPTY' : 'RESOURCES // ${links.length} SAVED',
+                          style: AppTheme.mono.copyWith(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                            color: AppColors.cyan,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const Spacer(),
                   DevPadButton(
-                    label: 'Add link',
+                    label: 'Add Link',
                     icon: const Icon(Icons.add, size: 18),
                     expand: false,
                     onPressed: _add,
@@ -152,7 +152,7 @@ class _LinksSectionState extends ConsumerState<LinksSection> {
     final options = <LinkCategory?>[null, ...LinkCategory.values];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: edge, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: edge, vertical: 4),
       child: Row(
         children: [
           for (final option in options)
@@ -162,8 +162,20 @@ class _LinksSectionState extends ConsumerState<LinksSection> {
                 label: Text(
                   '${option?.label ?? 'All'} '
                   '${option == null ? links.length : links.where((l) => l.category == option).length}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: _category == option ? FontWeight.w600 : FontWeight.w400,
+                    color: _category == option ? AppColors.cyan : AppColors.textDim,
+                  ),
                 ),
                 selected: _category == option,
+                selectedColor: AppColors.cyan.withValues(alpha: 0.15),
+                backgroundColor: AppColors.surfaceElevated,
+                side: BorderSide(
+                  color: _category == option
+                      ? AppColors.cyan.withValues(alpha: 0.6)
+                      : AppColors.border,
+                ),
                 showCheckmark: false,
                 visualDensity: VisualDensity.compact,
                 onSelected: (_) => setState(() => _category = option),
