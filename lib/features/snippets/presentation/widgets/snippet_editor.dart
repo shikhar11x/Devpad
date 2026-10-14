@@ -10,6 +10,7 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/edit_fingerprints.dart';
 import '../../../../core/widgets/conflict_banner.dart';
+import '../../../../core/widgets/cyber_confirm_dialog.dart';
 // Shared with Notes for now; candidate to move into core/widgets later.
 import '../../../notes/presentation/widgets/note_save_indicator.dart';
 import '../../domain/entities/snippet.dart';
@@ -274,29 +275,12 @@ class _SnippetEditorState extends ConsumerState<SnippetEditor> {
   }
 
   Future<void> _delete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radius),
-          side: const BorderSide(color: AppColors.border),
-        ),
-        title: const Text('Delete snippet?'),
-        content: const Text('This snippet will be permanently deleted.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await showCyberConfirmDialog(
+      context,
+      title: 'Delete Code Snippet?',
+      message: 'This snippet will be permanently deleted from the codebase repository.',
+      confirmLabel: 'Delete Snippet',
+      icon: Icons.delete_outline_rounded,
     );
     if (confirmed != true || !mounted) return;
 
