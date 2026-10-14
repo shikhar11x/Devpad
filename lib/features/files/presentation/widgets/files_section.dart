@@ -8,6 +8,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/services/url_opener.dart';
 import '../../../../core/utils/responsive.dart';
+import '../../../../core/widgets/cyber_confirm_dialog.dart';
 import '../../../../core/widgets/devpad_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
@@ -81,29 +82,12 @@ class _FilesSectionState extends ConsumerState<FilesSection> {
   }
 
   Future<void> _delete(PadFile file) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radius),
-          side: const BorderSide(color: AppColors.border),
-        ),
-        title: const Text('Delete file?'),
-        content: Text('"${file.name}" will be permanently deleted.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await showCyberConfirmDialog(
+      context,
+      title: 'Delete "${file.name}"?',
+      message: '"${file.name}" will be permanently removed from vault storage.',
+      confirmLabel: 'Delete File',
+      icon: Icons.delete_outline_rounded,
     );
     if (confirmed != true || !mounted) return;
     try {
@@ -160,21 +144,39 @@ class _FilesSectionState extends ConsumerState<FilesSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(edge, 16, edge, 4),
+              padding: EdgeInsets.fromLTRB(edge, 16, edge, 6),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      files.isEmpty ? 'FILES' : 'FILES · ${files.length}',
-                      style: AppTheme.mono.copyWith(
-                        fontSize: 11,
-                        letterSpacing: 1.2,
-                        color: AppColors.textMuted,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.cyan.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: AppColors.cyan.withValues(alpha: 0.3),
+                        width: 1,
                       ),
                     ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.cloud_done_outlined, size: 13, color: AppColors.cyan),
+                        const SizedBox(width: 6),
+                        Text(
+                          files.isEmpty ? 'VAULT // EMPTY' : 'VAULT // ${files.length} ASSETS',
+                          style: AppTheme.mono.copyWith(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                            color: AppColors.cyan,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const Spacer(),
                   DevPadButton(
-                    label: 'Upload',
+                    label: 'Upload File',
                     icon: const Icon(Icons.upload_file, size: 18),
                     expand: false,
                     isLoading: _uploading,
@@ -184,12 +186,12 @@ class _FilesSectionState extends ConsumerState<FilesSection> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(edge, 0, edge, 8),
+              padding: EdgeInsets.fromLTRB(edge, 0, edge, 10),
               child: Text(
-                'Images and PDFs up to 5 MB. Files are removed after 7 days.',
+                '// Encrypted object storage · Max 5 MB · 7-day auto-purge policy',
                 style: AppTheme.mono.copyWith(
                   fontSize: 11,
-                  color: AppColors.textMuted,
+                  color: AppColors.textDim,
                 ),
               ),
             ),
