@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/utils/responsive.dart';
+import '../../../../core/widgets/cyber_confirm_dialog.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -85,29 +86,12 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
   }
 
   Future<void> _delete(Task task) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radius),
-          side: const BorderSide(color: AppColors.border),
-        ),
-        title: const Text('Delete task?'),
-        content: Text('"${task.title}" will be permanently deleted.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await showCyberConfirmDialog(
+      context,
+      title: 'Delete "${task.title}"?',
+      message: 'This task will be permanently deleted from the workspace.',
+      confirmLabel: 'Delete Task',
+      icon: Icons.delete_outline_rounded,
     );
     if (confirmed != true || !mounted) return;
 
@@ -161,13 +145,42 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
             ),
             if (tasks.isNotEmpty) ...[
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: edge, vertical: 4),
-                child: Text(
-                  '$doneCount of ${tasks.length} done',
-                  style: AppTheme.mono.copyWith(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                  ),
+                padding: EdgeInsets.symmetric(horizontal: edge, vertical: 6),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.cyan.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppColors.cyan.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        'SPRINT // $doneCount OF ${tasks.length} RESOLVED (${(tasks.isEmpty ? 0 : (doneCount / tasks.length * 100)).toInt()}%)',
+                        style: AppTheme.mono.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
+                          color: AppColors.cyan,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: tasks.isEmpty ? 0.0 : doneCount / tasks.length,
+                          minHeight: 4,
+                          backgroundColor: AppColors.surfaceElevated,
+                          valueColor: const AlwaysStoppedAnimation<Color>(AppColors.cyan),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               _chipRow<TaskStatus>(
@@ -197,22 +210,46 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
     return Row(
       children: [
         Expanded(
-          child: TextField(
-            controller: _quick,
-            focusNode: _quickFocus,
-            textInputAction: TextInputAction.done,
-            inputFormatters: [LengthLimitingTextInputFormatter(200)],
-            onSubmitted: (_) => _quickAdd(),
-            decoration: const InputDecoration(
-              hintText: 'Add a task and press Enter',
-              prefixIcon: Icon(Icons.add, size: 18),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceSecondary,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.cyan.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
+            child: TextField(
+              controller: _quick,
+              focusNode: _quickFocus,
+              textInputAction: TextInputAction.done,
+              inputFormatters: [LengthLimitingTextInputFormatter(200)],
+              onSubmitted: (_) => _quickAdd(),
+              style: AppTheme.mono.copyWith(fontSize: 13),
+              decoration: InputDecoration(
+                hintText: '// quick add task... (press Enter)',
+                hintStyle: AppTheme.mono.copyWith(
+                  color: AppColors.textDim,
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(Icons.terminal_rounded, size: 18, color: AppColors.cyan),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 8),
         IconButton(
           tooltip: 'New task with details',
-          icon: const Icon(Icons.tune, size: 20),
+          style: IconButton.styleFrom(
+            backgroundColor: AppColors.surfaceElevated,
+            side: BorderSide(color: AppColors.cyan.withValues(alpha: 0.25)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          icon: const Icon(Icons.tune_rounded, size: 20, color: AppColors.cyan),
           onPressed: () => showTaskFormDialog(context, padId: widget.padId),
         ),
       ],
@@ -228,15 +265,29 @@ class _TasksSectionState extends ConsumerState<TasksSection> {
   }) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: edge, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: edge, vertical: 3),
       child: Row(
         children: [
           for (final option in options)
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ChoiceChip(
-                label: Text(label(option)),
+                label: Text(
+                  label(option),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: selected == option ? FontWeight.w600 : FontWeight.w400,
+                    color: selected == option ? AppColors.cyan : AppColors.textDim,
+                  ),
+                ),
                 selected: selected == option,
+                selectedColor: AppColors.cyan.withValues(alpha: 0.15),
+                backgroundColor: AppColors.surfaceElevated,
+                side: BorderSide(
+                  color: selected == option
+                      ? AppColors.cyan.withValues(alpha: 0.6)
+                      : AppColors.border,
+                ),
                 showCheckmark: false,
                 visualDensity: VisualDensity.compact,
                 onSelected: (_) => onSelected(option),
